@@ -11,7 +11,7 @@ module.exports = [
   {
     input: "js/loader/main.ts",
     output: {
-      file: "custom_components/iconify/loader.js",
+      file: "custom_components/custom_icons/loader.js",
       format: "es",
     },
     plugins: [
@@ -29,7 +29,7 @@ module.exports = [
   {
     input: "js/panel/main.ts",
     output: {
-      file: "custom_components/iconify/panel.js",
+      file: "custom_components/custom_icons/panel.js",
       format: "es",
     },
     plugins: [

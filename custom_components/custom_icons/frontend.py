@@ -154,7 +154,7 @@ async def ws_flush_icons(
     connection.send_result(msg["id"])
 
 
-async def async_register_iconify_frontend(hass: HomeAssistant):
+async def async_register_custom_icons_frontend(hass: HomeAssistant):
 
     websocket_api.async_register_command(hass, ws_get_icon_sets)
     websocket_api.async_register_command(hass, ws_get_active_sets)
@@ -179,7 +179,7 @@ async def async_register_iconify_frontend(hass: HomeAssistant):
         hass=hass,
         frontend_url_path=DOMAIN + "-config",
         config_panel_domain=DOMAIN,
-        webcomponent_name="iconify-panel",
+        webcomponent_name="custom-icons-panel",
         module_url=PANEL_URL,
         embed_iframe=False,
         require_admin=True,

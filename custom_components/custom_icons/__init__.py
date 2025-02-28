@@ -1,7 +1,7 @@
 import os
 
 from .const import ICON_PATH
-from .frontend import async_register_iconify_frontend
+from .frontend import async_register_custom_icons_frontend
 
 
 async def async_setup(hass, config):
@@ -9,7 +9,7 @@ async def async_setup(hass, config):
     if not os.path.exists(icon_dir):
         os.mkdir(icon_dir)
 
-    await async_register_iconify_frontend(hass)
+    await async_register_custom_icons_frontend(hass)
     return True
 
 

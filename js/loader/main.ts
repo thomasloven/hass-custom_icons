@@ -13,14 +13,14 @@ if (!("customIcons" in window)) {
 const _getIcon = async (iconSet, iconName) => {
   const conn = (await hass()).connection;
   const icon = await conn.sendMessagePromise({
-    type: "iconify/icon",
+    type: "custom_icons/icon",
     set: iconSet,
     icon: iconName,
   });
   return icon;
 };
 
-const iconify_getIcon = async (iconSet, iconName) => {
+const getIcon = async (iconSet, iconName) => {
   if (!icon_cache[iconSet]?.[iconName]) {
     const icon = await _getIcon(iconSet, iconName);
 
@@ -35,17 +35,17 @@ const iconify_getIcon = async (iconSet, iconName) => {
       path: icon.path ?? "",
       secondaryPath: icon.path2 ?? "",
       viewBox: renderData.viewBox,
-      format: "iconify",
+      format: "custom_icons",
       innerSVG: renderData.body,
     };
   }
   return icon_cache[iconSet][iconName];
 };
 
-const iconify_getIconList = async (iconSet) => {
+const getIconList = async (iconSet) => {
   const conn = (await hass()).connection;
   const list = await conn.sendMessagePromise({
-    type: "iconify/list",
+    type: "custom_icons/list",
     set: iconSet,
   });
   return list;
@@ -54,14 +54,14 @@ const iconify_getIconList = async (iconSet) => {
 const setup = async () => {
   const conn = (await hass()).connection;
   const sets = await conn.sendMessagePromise({
-    type: "iconify/activesets",
+    type: "custom_icons/activesets",
   });
 
   for (const prefix of sets) {
     icon_cache[prefix] = {};
     (window as any).customIcons[prefix] = {
-      getIcon: (iconName) => iconify_getIcon(prefix, iconName),
-      getIconList: () => iconify_getIconList(prefix),
+      getIcon: (iconName) => getIcon(prefix, iconName),
+      getIconList: () => getIconList(prefix),
     };
   }
 };
@@ -77,7 +77,7 @@ customElements.whenDefined("ha-icon").then((HaIcon) => {
     const icon = await promise;
     if (requestedIcon !== this.icon) return;
 
-    if (!icon.innerSVG || icon.format !== "iconify") return;
+    if (!icon.innerSVG || icon.format !== "custom_icons") return;
 
     await this.UpdateComplete;
     const el = this.shadowRoot.querySelector("ha-svg-icon");

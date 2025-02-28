@@ -7,7 +7,11 @@ import json
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import DOMAIN, REPO_URL, REPO_FILENAME, ICON_PATH
+from .const import DOMAIN, ICON_PATH
+
+
+ICONIFY_REPO_URL = "https://github.com/iconify/icon-sets/archive/refs/heads/master.zip"
+ICONIFY_REPO_FILENAME = "icon-sets-master.zip"
 
 iconify_data_cache = None
 
@@ -22,7 +26,7 @@ async def download_data(hass: HomeAssistant, force: bool = False):
     session: aiohttp.ClientSession = async_get_clientsession(hass)
 
     targetpath = hass.config.path(ICON_PATH)
-    target = targetpath + "/" + REPO_FILENAME
+    target = targetpath + "/" + ICONIFY_REPO_FILENAME
 
     if os.path.isfile(target) and not force:
         return target
@@ -31,7 +35,7 @@ async def download_data(hass: HomeAssistant, force: bool = False):
         os.mkdir(targetpath)
 
     # try:
-    request = await session.get(url=REPO_URL)
+    request = await session.get(url=ICONIFY_REPO_URL)
 
     if request.status == 200:
         async with aiofiles.open(target, "wb") as fp:

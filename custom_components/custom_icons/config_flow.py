@@ -8,7 +8,7 @@ from .const import DOMAIN
 LOGGER = logging.getLogger(__name__)
 
 
-class IconifyConfigFlow(ConfigFlow, domain=DOMAIN):
+class CustomIconsConfigFlow(ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
@@ -19,4 +19,4 @@ class IconifyConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return self.async_create_entry(title="Iconify", data={})
+        return self.async_create_entry(title="Custom Icons", data={})

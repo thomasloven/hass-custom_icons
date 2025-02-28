@@ -1,20 +1,20 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-@customElement("iconify-download-card")
-export class IconifyDownloadCard extends LitElement {
+@customElement("custom-icons-download-card")
+export class CustomIconsDownloadCard extends LitElement {
   @property() hass;
 
   async _download_iconify() {
     await this.hass.connection.sendMessage({
-      type: "iconify/iconify_download",
+      type: "custom_icons/iconify_download",
     });
     this.dispatchEvent(new Event("reload"));
   }
 
   async _flush_icons() {
     await this.hass.connection.sendMessage({
-      type: "iconify/flush_icons",
+      type: "custom_icons/flush_icons",
     });
     this.dispatchEvent(new Event("reload"));
   }
@@ -30,7 +30,7 @@ export class IconifyDownloadCard extends LitElement {
 
             Home Assistant normally protects against this, but in order to
             enable advanced features such as duotone or color support
-            <b>that protection is disabled for all Iconify icon</b>. <br />
+            <b>that protection is disabled for all Custom Icons</b>. <br />
 
             Iconify icons are allegedly validated and cleaned from any such
             potentially harmful elements, but be careful. <br />
@@ -41,6 +41,16 @@ export class IconifyDownloadCard extends LitElement {
           </ha-alert>
 
           <br />
+          <ha-settings-row>
+            <span slot="heading">Reload Custom Icons</span>
+            <span slot="description">
+              Reload icons in the
+              <tt>custom_icons</tt>
+              directory<br />
+              (this includes Fontawesome-pro icons if available)
+            </span>
+            <ha-button @click=${() => this._flush_icons()}>Reload</ha-button>
+          </ha-settings-row>
           <br />
 
           <ha-alert alert-type="info" title="About Iconify icons">
@@ -52,7 +62,7 @@ export class IconifyDownloadCard extends LitElement {
           </ha-alert>
 
           <ha-settings-row>
-            <span slot="heading">Update Iconify icons</span>
+            <span slot="heading">Update Iconify Icons</span>
             <span slot="description">
               Download the latest icon sets from
               <a href="https://github.com/iconify/icon-sets">github</a>
@@ -60,16 +70,6 @@ export class IconifyDownloadCard extends LitElement {
             <ha-button @click=${() => this._download_iconify()}
               >Download</ha-button
             >
-          </ha-settings-row>
-
-          <ha-settings-row>
-            <span slot="heading">Reload custom icons</span>
-            <span slot="description">
-              Reload icons in the
-              <tt>custom_icons</tt>
-              directory
-            </span>
-            <ha-button @click=${() => this._flush_icons()}>Reload</ha-button>
           </ha-settings-row>
         </div>
       </ha-card>

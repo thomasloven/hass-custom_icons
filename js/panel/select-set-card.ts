@@ -3,15 +3,15 @@ import { customElement, property } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { iconToSVG, iconToHTML } from "@iconify/utils";
 
-@customElement("iconify-select-set-card")
-export class IconifySelectSetCard extends LitElement {
+@customElement("custom-icons-select-set-card")
+export class CustomIconsSelectSetCard extends LitElement {
   @property() hass;
   @property() sets;
 
   async _toggle_set(prefix) {
     const state = this.sets[prefix].active;
     await this.hass.connection.sendMessage({
-      type: "iconify/select",
+      type: "custom_icons/select",
       set: prefix,
       active: !state,
     });

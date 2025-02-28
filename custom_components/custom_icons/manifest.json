@@ -1,10 +1,10 @@
 {
-  "domain": "iconify",
-  "name": "Iconify icons",
+  "domain": "custom_icons",
+  "name": "Custom Icons",
   "codeowners": ["@thomasloven"],
   "config_flow": true,
   "dependencies": ["frontend", "http"],
-  "documentation": "https://github.com/thomasloven/hass-iconify",
+  "documentation": "https://github.com/thomasloven/hass-custom_icons",
   "iot_class": "calculated",
   "requirements": ["aiofiles"],
   "single_config_entry": true,

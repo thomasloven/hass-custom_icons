@@ -7,7 +7,7 @@ import "./select-set-card";
 
 loadConfigDashboard();
 
-@customElement("iconify-panel")
+@customElement("custom-icons-panel")
 class BrowserModPanel extends LitElement {
   @property() hass;
   @property() narrow;
@@ -19,7 +19,7 @@ class BrowserModPanel extends LitElement {
     this.sets = null;
     this.requestUpdate();
     this.sets = await this.hass.connection.sendMessagePromise({
-      type: "iconify/sets",
+      type: "custom_icons/sets",
     });
   }
 
@@ -35,20 +35,20 @@ class BrowserModPanel extends LitElement {
           .hass=${this.hass}
           .narrow=${this.narrow}
         ></ha-menu-button>
-        <div slot="title">Iconify Settings</div>
+        <div slot="title">Custom Icon Settings</div>
 
         <ha-config-section .narrow=${this.narrow} full-width>
-          <iconify-download-card
+          <custom-icons-download-card
             .hass=${this.hass}
             @reload=${() => this._get_sets()}
           >
-          </iconify-download-card>
+          </custom-icons-download-card>
           ${this.sets
             ? html`
-                <iconify-select-set-card
+                <custom-icons-select-set-card
                   .hass=${this.hass}
                   .sets=${this.sets}
-                ></iconify-select-set-card>
+                ></custom-icons-select-set-card>
               `
             : html`<ha-card outlined
                 ><div class="card-content"><p>Loading...</p></div></ha-card

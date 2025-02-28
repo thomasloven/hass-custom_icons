@@ -90,16 +90,16 @@ const loadConfigDashboard = async () => {
     await customElements.whenDefined("ha-config-dashboard");
 };
 
-let IconifyDownloadCard = class IconifyDownloadCard extends s {
+let CustomIconsDownloadCard = class CustomIconsDownloadCard extends s {
     async _download_iconify() {
         await this.hass.connection.sendMessage({
-            type: "iconify/iconify_download",
+            type: "custom_icons/iconify_download",
         });
         this.dispatchEvent(new Event("reload"));
     }
     async _flush_icons() {
         await this.hass.connection.sendMessage({
-            type: "iconify/flush_icons",
+            type: "custom_icons/flush_icons",
         });
         this.dispatchEvent(new Event("reload"));
     }
@@ -114,7 +114,7 @@ let IconifyDownloadCard = class IconifyDownloadCard extends s {
 
             Home Assistant normally protects against this, but in order to
             enable advanced features such as duotone or color support
-            <b>that protection is disabled for all Iconify icon</b>. <br />
+            <b>that protection is disabled for all Custom Icons</b>. <br />
 
             Iconify icons are allegedly validated and cleaned from any such
             potentially harmful elements, but be careful. <br />
@@ -125,6 +125,16 @@ let IconifyDownloadCard = class IconifyDownloadCard extends s {
           </ha-alert>
 
           <br />
+          <ha-settings-row>
+            <span slot="heading">Reload Custom Icons</span>
+            <span slot="description">
+              Reload icons in the
+              <tt>custom_icons</tt>
+              directory<br />
+              (this includes Fontawesome-pro icons if available)
+            </span>
+            <ha-button @click=${() => this._flush_icons()}>Reload</ha-button>
+          </ha-settings-row>
           <br />
 
           <ha-alert alert-type="info" title="About Iconify icons">
@@ -136,7 +146,7 @@ let IconifyDownloadCard = class IconifyDownloadCard extends s {
           </ha-alert>
 
           <ha-settings-row>
-            <span slot="heading">Update Iconify icons</span>
+            <span slot="heading">Update Iconify Icons</span>
             <span slot="description">
               Download the latest icon sets from
               <a href="https://github.com/iconify/icon-sets">github</a>
@@ -144,16 +154,6 @@ let IconifyDownloadCard = class IconifyDownloadCard extends s {
             <ha-button @click=${() => this._download_iconify()}
               >Download</ha-button
             >
-          </ha-settings-row>
-
-          <ha-settings-row>
-            <span slot="heading">Reload custom icons</span>
-            <span slot="description">
-              Reload icons in the
-              <tt>custom_icons</tt>
-              directory
-            </span>
-            <ha-button @click=${() => this._flush_icons()}>Reload</ha-button>
           </ha-settings-row>
         </div>
       </ha-card>
@@ -179,10 +179,10 @@ let IconifyDownloadCard = class IconifyDownloadCard extends s {
 };
 __decorate([
     n$1()
-], IconifyDownloadCard.prototype, "hass", void 0);
-IconifyDownloadCard = __decorate([
-    e$3("iconify-download-card")
-], IconifyDownloadCard);
+], CustomIconsDownloadCard.prototype, "hass", void 0);
+CustomIconsDownloadCard = __decorate([
+    e$3("custom-icons-download-card")
+], CustomIconsDownloadCard);
 
 /**
  * @license
@@ -420,11 +420,11 @@ function iconToHTML(body, attributes) {
   return '<svg xmlns="http://www.w3.org/2000/svg"' + renderAttribsHTML + ">" + body + "</svg>";
 }
 
-let IconifySelectSetCard = class IconifySelectSetCard extends s {
+let CustomIconsSelectSetCard = class CustomIconsSelectSetCard extends s {
     async _toggle_set(prefix) {
         const state = this.sets[prefix].active;
         await this.hass.connection.sendMessage({
-            type: "iconify/select",
+            type: "custom_icons/select",
             set: prefix,
             active: !state,
         });
@@ -526,13 +526,13 @@ let IconifySelectSetCard = class IconifySelectSetCard extends s {
 };
 __decorate([
     n$1()
-], IconifySelectSetCard.prototype, "hass", void 0);
+], CustomIconsSelectSetCard.prototype, "hass", void 0);
 __decorate([
     n$1()
-], IconifySelectSetCard.prototype, "sets", void 0);
-IconifySelectSetCard = __decorate([
-    e$3("iconify-select-set-card")
-], IconifySelectSetCard);
+], CustomIconsSelectSetCard.prototype, "sets", void 0);
+CustomIconsSelectSetCard = __decorate([
+    e$3("custom-icons-select-set-card")
+], CustomIconsSelectSetCard);
 
 loadConfigDashboard();
 let BrowserModPanel = class BrowserModPanel extends s {
@@ -540,7 +540,7 @@ let BrowserModPanel = class BrowserModPanel extends s {
         this.sets = null;
         this.requestUpdate();
         this.sets = await this.hass.connection.sendMessagePromise({
-            type: "iconify/sets",
+            type: "custom_icons/sets",
         });
     }
     firstUpdated(_changedProperties) {
@@ -554,20 +554,20 @@ let BrowserModPanel = class BrowserModPanel extends s {
           .hass=${this.hass}
           .narrow=${this.narrow}
         ></ha-menu-button>
-        <div slot="title">Iconify Settings</div>
+        <div slot="title">Custom Icon Settings</div>
 
         <ha-config-section .narrow=${this.narrow} full-width>
-          <iconify-download-card
+          <custom-icons-download-card
             .hass=${this.hass}
             @reload=${() => this._get_sets()}
           >
-          </iconify-download-card>
+          </custom-icons-download-card>
           ${this.sets
             ? x `
-                <iconify-select-set-card
+                <custom-icons-select-set-card
                   .hass=${this.hass}
                   .sets=${this.sets}
-                ></iconify-select-set-card>
+                ></custom-icons-select-set-card>
               `
             : x `<ha-card outlined
                 ><div class="card-content"><p>Loading...</p></div></ha-card
@@ -622,5 +622,5 @@ __decorate([
     n$1()
 ], BrowserModPanel.prototype, "sets", void 0);
 BrowserModPanel = __decorate([
-    e$3("iconify-panel")
+    e$3("custom-icons-panel")
 ], BrowserModPanel);
