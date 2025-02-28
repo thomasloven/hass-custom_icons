@@ -22,6 +22,8 @@ export class IconifySelectSetCard extends LitElement {
       <ha-card outlined>
         <h1 class="card-header">Icon sets</h1>
         <div class="card-content">
+          <p>Only enabled icon sets will be available.</p>
+          <p>Remember to reload your frontend after enabling new icon sets.</p>
           ${Object.keys(this.sets).map((prefix) => {
             const set = this.sets[prefix];
             return html`
@@ -35,28 +37,33 @@ export class IconifySelectSetCard extends LitElement {
                 </span>
                 <span slot="description">
                   <div>
-                    ${set.total} icons by ${set.author.name} -
-                    <a href="${set.author.url}" target="_blank">
-                      ${set.author.url}
-                    </a>
+                    ${set.total} icons
+                    ${set.author
+                      ? html`by ${set.author.name} -
+                          <a href="${set.author.url}" target="_blank">
+                            ${set.author.url}
+                          </a>`
+                      : ""}
                   </div>
-                  <div class="samples">
-                    ${set.sample_icons?.map((i) => {
-                      const renderData = iconToSVG(i);
-                      if (renderData?.body) {
-                        return unsafeHTML(
-                          iconToHTML(renderData.body, renderData.attributes)
-                        );
-                      }
-                      return "";
-                    })}
-                    <a
-                      href="https://icon-sets.iconify.design/${prefix}/"
-                      target="_blank"
-                    >
-                      <ha-icon .icon=${"mdi:open-in-new"}> </ha-icon>
-                    </a>
-                  </div>
+                  ${set.sample_icons
+                    ? html` <div class="samples">
+                        ${set.sample_icons?.map((i) => {
+                          const renderData = iconToSVG(i);
+                          if (renderData?.body) {
+                            return unsafeHTML(
+                              iconToHTML(renderData.body, renderData.attributes)
+                            );
+                          }
+                          return "";
+                        })}
+                        <a
+                          href="https://icon-sets.iconify.design/${prefix}/"
+                          target="_blank"
+                        >
+                          <ha-icon .icon=${"mdi:open-in-new"}> </ha-icon>
+                        </a>
+                      </div>`
+                    : ""}
                 </span>
 
                 <ha-switch

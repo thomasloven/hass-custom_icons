@@ -1,5 +1,6 @@
 import { iconToSVG } from "@iconify/utils";
 import { hass } from "../helpers";
+import { IconifySelectSetCard } from "../panel/select-set-card";
 
 const icon_cache = {};
 
@@ -10,19 +11,30 @@ if (!("customIcons" in window)) {
   (window as any).customIcons = {};
 }
 
-const getIcon = async (iconSet, iconName) => {
-  if (!icon_cache[iconSet]?.[iconName]) {
-    const conn = (await hass()).connection;
-    const icon = await conn.sendMessagePromise({
-      type: "iconify/icon",
-      set: iconSet,
-      icon: iconName,
-    });
+const _getIcon = async (iconSet, iconName) => {
+  const conn = (await hass()).connection;
+  const icon = await conn.sendMessagePromise({
+    type: "iconify/icon",
+    set: iconSet,
+    icon: iconName,
+  });
+  return icon;
+};
 
-    const renderData = iconToSVG(icon);
+const iconify_getIcon = async (iconSet, iconName) => {
+  if (!icon_cache[iconSet]?.[iconName]) {
+    const icon = await _getIcon(iconSet, iconName);
+
+    let renderData;
+    if (icon.renderer == "iconify") {
+      renderData = iconToSVG(icon);
+    } else {
+      renderData = icon;
+    }
 
     icon_cache[iconSet][iconName] = {
-      path: "",
+      path: icon.path ?? "",
+      secondaryPath: icon.path2 ?? "",
       viewBox: renderData.viewBox,
       format: "iconify",
       innerSVG: renderData.body,
@@ -31,15 +43,13 @@ const getIcon = async (iconSet, iconName) => {
   return icon_cache[iconSet][iconName];
 };
 
-const getIconList = async (iconSet) => {
+const iconify_getIconList = async (iconSet) => {
   const conn = (await hass()).connection;
   const list = await conn.sendMessagePromise({
     type: "iconify/list",
     set: iconSet,
   });
-  return list.map((i) => ({
-    name: i,
-  }));
+  return list;
 };
 
 const setup = async () => {
@@ -51,8 +61,8 @@ const setup = async () => {
   for (const prefix of sets) {
     icon_cache[prefix] = {};
     (window as any).customIcons[prefix] = {
-      getIcon: (iconName) => getIcon(prefix, iconName),
-      getIconList: () => getIconList(prefix),
+      getIcon: (iconName) => iconify_getIcon(prefix, iconName),
+      getIconList: () => iconify_getIconList(prefix),
     };
   }
 };

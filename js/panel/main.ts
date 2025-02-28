@@ -44,7 +44,9 @@ class BrowserModPanel extends LitElement {
                   .sets=${this.sets}
                 ></iconify-select-set-card>
               `
-            : ""}
+            : html`<ha-card outlined
+                ><div class="card-content"><p>Loading...</p></div></ha-card
+              >`}
         </ha-config-section>
       </ha-top-app-bar-fixed>
     `;

@@ -94,19 +94,8 @@ let IconifyDownloadCard = class IconifyDownloadCard extends s {
     render() {
         return x `
       <ha-card outlined>
-        <h1 class="card-header">Iconify icons</h1>
+        <h1 class="card-header">Custom icons</h1>
         <div class="card-content">
-          <ha-alert alert-type="info" title="About Iconify icons">
-            <a href="https://iconify.design/">Iconify</a> is a collection of
-            several popular icon sets. Updates are published frequently, and the
-            database is therefore downloaded from github on request. If an icon
-            seems to be missing, try the Download button below to update the
-            local database.
-          </ha-alert>
-
-          <br />
-          <br />
-
           <ha-alert alert-type="warning" title="Dangers of external SVG icons">
             SVG icons cat theoretically contain javascript and listeners or link
             to external resources. <br />
@@ -123,13 +112,34 @@ let IconifyDownloadCard = class IconifyDownloadCard extends s {
             responsibility for the content of the icon sets.
           </ha-alert>
 
+          <br />
+          <br />
+
+          <ha-alert alert-type="info" title="About Iconify icons">
+            <a href="https://iconify.design/">Iconify</a> is a collection of
+            several popular icon sets. Updates are published frequently, and the
+            database is therefore downloaded from github on request. If an icon
+            seems to be missing, try the Download button below to update the
+            local database.
+          </ha-alert>
+
           <ha-settings-row>
-            <span slot="heading">Update icons</span>
+            <span slot="heading">Update Iconify icons</span>
             <span slot="description">
               Download the latest icon sets from
               <a href="https://github.com/iconify/icon-sets">github</a>
             </span>
             <ha-button>Download</ha-button>
+          </ha-settings-row>
+
+          <ha-settings-row>
+            <span slot="heading">Reload custom icons</span>
+            <span slot="description">
+              Reload icons in the
+              <tt>custom_icons</tt>
+              directory
+            </span>
+            <ha-button>Reload</ha-button>
           </ha-settings-row>
         </div>
       </ha-card>
@@ -410,6 +420,8 @@ let IconifySelectSetCard = class IconifySelectSetCard extends s {
       <ha-card outlined>
         <h1 class="card-header">Icon sets</h1>
         <div class="card-content">
+          <p>Only enabled icon sets will be available.</p>
+          <p>Remember to reload your frontend after enabling new icon sets.</p>
           ${Object.keys(this.sets).map((prefix) => {
             var _a;
             const set = this.sets[prefix];
@@ -424,26 +436,31 @@ let IconifySelectSetCard = class IconifySelectSetCard extends s {
                 </span>
                 <span slot="description">
                   <div>
-                    ${set.total} icons by ${set.author.name} -
-                    <a href="${set.author.url}" target="_blank">
-                      ${set.author.url}
-                    </a>
+                    ${set.total} icons
+                    ${set.author
+                ? x `by ${set.author.name} -
+                          <a href="${set.author.url}" target="_blank">
+                            ${set.author.url}
+                          </a>`
+                : ""}
                   </div>
-                  <div class="samples">
-                    ${(_a = set.sample_icons) === null || _a === void 0 ? void 0 : _a.map((i) => {
-                const renderData = iconToSVG(i);
-                if (renderData === null || renderData === void 0 ? void 0 : renderData.body) {
-                    return o(iconToHTML(renderData.body, renderData.attributes));
-                }
-                return "";
-            })}
-                    <a
-                      href="https://icon-sets.iconify.design/${prefix}/"
-                      target="_blank"
-                    >
-                      <ha-icon .icon=${"mdi:open-in-new"}> </ha-icon>
-                    </a>
-                  </div>
+                  ${set.sample_icons
+                ? x ` <div class="samples">
+                        ${(_a = set.sample_icons) === null || _a === void 0 ? void 0 : _a.map((i) => {
+                    const renderData = iconToSVG(i);
+                    if (renderData === null || renderData === void 0 ? void 0 : renderData.body) {
+                        return o(iconToHTML(renderData.body, renderData.attributes));
+                    }
+                    return "";
+                })}
+                        <a
+                          href="https://icon-sets.iconify.design/${prefix}/"
+                          target="_blank"
+                        >
+                          <ha-icon .icon=${"mdi:open-in-new"}> </ha-icon>
+                        </a>
+                      </div>`
+                : ""}
                 </span>
 
                 <ha-switch
@@ -532,7 +549,9 @@ let BrowserModPanel = class BrowserModPanel extends s {
                   .sets=${this.sets}
                 ></iconify-select-set-card>
               `
-            : ""}
+            : x `<ha-card outlined
+                ><div class="card-content"><p>Loading...</p></div></ha-card
+              >`}
         </ha-config-section>
       </ha-top-app-bar-fixed>
     `;

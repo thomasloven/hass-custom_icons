@@ -239,18 +239,29 @@ if (!("customIconsets" in window)) {
 if (!("customIcons" in window)) {
     window.customIcons = {};
 }
-const getIcon = async (iconSet, iconName) => {
-    var _a;
+const _getIcon = async (iconSet, iconName) => {
+    const conn = (await hass()).connection;
+    const icon = await conn.sendMessagePromise({
+        type: "iconify/icon",
+        set: iconSet,
+        icon: iconName,
+    });
+    return icon;
+};
+const iconify_getIcon = async (iconSet, iconName) => {
+    var _a, _b, _c;
     if (!((_a = icon_cache[iconSet]) === null || _a === void 0 ? void 0 : _a[iconName])) {
-        const conn = (await hass()).connection;
-        const icon = await conn.sendMessagePromise({
-            type: "iconify/icon",
-            set: iconSet,
-            icon: iconName,
-        });
-        const renderData = iconToSVG(icon);
+        const icon = await _getIcon(iconSet, iconName);
+        let renderData;
+        if (icon.renderer == "iconify") {
+            renderData = iconToSVG(icon);
+        }
+        else {
+            renderData = icon;
+        }
         icon_cache[iconSet][iconName] = {
-            path: "",
+            path: (_b = icon.path) !== null && _b !== void 0 ? _b : "",
+            secondaryPath: (_c = icon.path2) !== null && _c !== void 0 ? _c : "",
             viewBox: renderData.viewBox,
             format: "iconify",
             innerSVG: renderData.body,
@@ -258,15 +269,13 @@ const getIcon = async (iconSet, iconName) => {
     }
     return icon_cache[iconSet][iconName];
 };
-const getIconList = async (iconSet) => {
+const iconify_getIconList = async (iconSet) => {
     const conn = (await hass()).connection;
     const list = await conn.sendMessagePromise({
         type: "iconify/list",
         set: iconSet,
     });
-    return list.map((i) => ({
-        name: i,
-    }));
+    return list;
 };
 const setup = async () => {
     const conn = (await hass()).connection;
@@ -276,8 +285,8 @@ const setup = async () => {
     for (const prefix of sets) {
         icon_cache[prefix] = {};
         window.customIcons[prefix] = {
-            getIcon: (iconName) => getIcon(prefix, iconName),
-            getIconList: () => getIconList(prefix),
+            getIcon: (iconName) => iconify_getIcon(prefix, iconName),
+            getIconList: () => iconify_getIconList(prefix),
         };
     }
 };

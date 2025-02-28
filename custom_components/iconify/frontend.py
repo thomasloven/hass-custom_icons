@@ -7,7 +7,7 @@ from homeassistant.components.http import StaticPathConfig
 from homeassistant.core import HomeAssistant, callback
 
 from .const import DOMAIN
-from .iconify import get_data, download_data, get_iconlist, get_icon, flush
+from . import fapro, iconify
 
 LOGGER = logging.getLogger(__name__)
 
@@ -17,14 +17,14 @@ LOADER_JS = f"custom_components/{DOMAIN}/loader.js"
 PANEL_URL = f"/{DOMAIN}/panel.js"
 PANEL_JS = f"custom_components/{DOMAIN}/panel.js"
 
-# https://github.com/home-assistant/core/blob/6e4e5ba8c52b0c0c3d86deeaacde06754cb5689e/homeassistant/components/dynalite/panel.py
-
 
 @websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/activesets"})
 @websocket_api.require_admin
 @callback
 def ws_get_active_sets(
-    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict,
 ):
     config = hass.config_entries.async_entries(DOMAIN)
     if not config:
@@ -42,9 +42,14 @@ def ws_get_active_sets(
 @websocket_api.async_response
 @callback
 async def ws_get_icon_list(
-    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict,
 ):
-    lst = await get_iconlist(hass, msg["set"])
+    if msg["set"].startswith("fapro-"):
+        lst = await fapro.get_iconlist(hass, msg["set"])
+    else:
+        lst = await iconify.get_iconlist(hass, msg["set"])
     connection.send_result(msg["id"], lst)
 
 
@@ -58,9 +63,14 @@ async def ws_get_icon_list(
 @websocket_api.async_response
 @callback
 async def ws_get_icon(
-    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict,
 ):
-    icn = await get_icon(hass, msg["set"], msg["icon"])
+    if msg["set"].startswith("fapro-"):
+        icn = await fapro.get_icon(hass, msg["set"], msg["icon"])
+    else:
+        icn = await iconify.get_icon(hass, msg["set"], msg["icon"])
     connection.send_result(msg["id"], icn)
 
 
@@ -69,9 +79,11 @@ async def ws_get_icon(
 @websocket_api.async_response
 @callback
 async def ws_download_icon_sets(
-    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict,
 ):
-    await download_data(hass, True)
+    await iconify.download_data(hass, True)
     connection.send_result(msg["id"])
 
 
@@ -80,9 +92,14 @@ async def ws_download_icon_sets(
 @websocket_api.async_response
 @callback
 async def ws_get_icon_sets(
-    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict,
 ):
-    data = await get_data(hass)
+    data = {
+        **(await fapro.get_data(hass)),
+        **(await iconify.get_data(hass)),
+    }
     connection.send_result(msg["id"], data)
 
 
@@ -96,7 +113,9 @@ async def ws_get_icon_sets(
 @websocket_api.require_admin
 @callback
 def set_icon_sets(
-    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict,
 ):
     config = hass.config_entries.async_entries(DOMAIN)
     if not config:
@@ -110,7 +129,7 @@ def set_icon_sets(
 
     hass.config_entries.async_update_entry(config, data=data)
 
-    flush()
+    iconify.flush()
     connection.send_result(msg["id"])
 
 

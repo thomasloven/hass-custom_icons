@@ -9,12 +9,12 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import DOMAIN, REPO_URL, REPO_FILENAME
 
-data_cache = None
+iconify_data_cache = None
 
 
 def flush():
-    global data_cache
-    data_cache = None
+    global iconify_data_cache
+    iconify_data_cache = None
 
 
 async def download_data(hass: HomeAssistant, force: bool = False):
@@ -46,10 +46,10 @@ async def download_data(hass: HomeAssistant, force: bool = False):
 
 
 async def get_data(hass: HomeAssistant):
-    global data_cache
+    global iconify_data_cache
 
-    if data_cache:
-        return data_cache
+    if iconify_data_cache:
+        return iconify_data_cache
 
     filepath = await download_data(hass)
 
@@ -75,7 +75,7 @@ async def get_data(hass: HomeAssistant):
             "active": config.data.get(js["prefix"]),
             "sample_icons": samples,
         }
-    data_cache = files
+    iconify_data_cache = files
     return files
 
 
@@ -95,11 +95,12 @@ async def get_iconlist(hass: HomeAssistant, set: str):
 
     js = json.load(data.open())
 
-    return list(js.get("icons", {}).keys())
+    return [{"name": k} for k in js.get("icons", {}).keys()]
 
 
 def _get_icon(js: dict, name: str):
     data = {
+        "renderer": "iconify",
         "left": js.get("left", 0),
         "top": js.get("top", 0),
         "width": js.get("width", 16),

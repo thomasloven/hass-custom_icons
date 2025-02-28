@@ -6,7 +6,7 @@
   "dependencies": ["frontend", "http"],
   "documentation": "https://github.com/thomasloven/hass-iconify",
   "iot_class": "calculated",
-  "requirements": [],
+  "requirements": ["aiofiles"],
   "single_config_entry": true,
   "version": "0.1.0"
 }
