@@ -7,7 +7,7 @@ import json
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import DOMAIN, REPO_URL, REPO_FILENAME
+from .const import DOMAIN, REPO_URL, REPO_FILENAME, ICON_PATH
 
 iconify_data_cache = None
 
@@ -21,7 +21,7 @@ async def download_data(hass: HomeAssistant, force: bool = False):
 
     session: aiohttp.ClientSession = async_get_clientsession(hass)
 
-    targetpath = hass.config.path(f"custom_components/{DOMAIN}/data")
+    targetpath = hass.config.path(ICON_PATH)
     target = targetpath + "/" + REPO_FILENAME
 
     if os.path.isfile(target) and not force:

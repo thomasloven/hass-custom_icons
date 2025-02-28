@@ -91,6 +91,18 @@ const loadConfigDashboard = async () => {
 };
 
 let IconifyDownloadCard = class IconifyDownloadCard extends s {
+    async _download_iconify() {
+        await this.hass.connection.sendMessage({
+            type: "iconify/iconify_download",
+        });
+        this.dispatchEvent(new Event("reload"));
+    }
+    async _flush_icons() {
+        await this.hass.connection.sendMessage({
+            type: "iconify/flush_icons",
+        });
+        this.dispatchEvent(new Event("reload"));
+    }
     render() {
         return x `
       <ha-card outlined>
@@ -129,7 +141,9 @@ let IconifyDownloadCard = class IconifyDownloadCard extends s {
               Download the latest icon sets from
               <a href="https://github.com/iconify/icon-sets">github</a>
             </span>
-            <ha-button>Download</ha-button>
+            <ha-button @click=${() => this._download_iconify()}
+              >Download</ha-button
+            >
           </ha-settings-row>
 
           <ha-settings-row>
@@ -139,7 +153,7 @@ let IconifyDownloadCard = class IconifyDownloadCard extends s {
               <tt>custom_icons</tt>
               directory
             </span>
-            <ha-button>Reload</ha-button>
+            <ha-button @click=${() => this._flush_icons()}>Reload</ha-button>
           </ha-settings-row>
         </div>
       </ha-card>
@@ -523,6 +537,8 @@ IconifySelectSetCard = __decorate([
 loadConfigDashboard();
 let BrowserModPanel = class BrowserModPanel extends s {
     async _get_sets() {
+        this.sets = null;
+        this.requestUpdate();
         this.sets = await this.hass.connection.sendMessagePromise({
             type: "iconify/sets",
         });
@@ -541,7 +557,11 @@ let BrowserModPanel = class BrowserModPanel extends s {
         <div slot="title">Iconify Settings</div>
 
         <ha-config-section .narrow=${this.narrow} full-width>
-          <iconify-download-card .hass=${this.hass}> </iconify-download-card>
+          <iconify-download-card
+            .hass=${this.hass}
+            @reload=${() => this._get_sets()}
+          >
+          </iconify-download-card>
           ${this.sets
             ? x `
                 <iconify-select-set-card

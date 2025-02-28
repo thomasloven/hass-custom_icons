@@ -16,6 +16,8 @@ class BrowserModPanel extends LitElement {
   @property() sets;
 
   async _get_sets() {
+    this.sets = null;
+    this.requestUpdate();
     this.sets = await this.hass.connection.sendMessagePromise({
       type: "iconify/sets",
     });
@@ -36,7 +38,11 @@ class BrowserModPanel extends LitElement {
         <div slot="title">Iconify Settings</div>
 
         <ha-config-section .narrow=${this.narrow} full-width>
-          <iconify-download-card .hass=${this.hass}> </iconify-download-card>
+          <iconify-download-card
+            .hass=${this.hass}
+            @reload=${() => this._get_sets()}
+          >
+          </iconify-download-card>
           ${this.sets
             ? html`
                 <iconify-select-set-card

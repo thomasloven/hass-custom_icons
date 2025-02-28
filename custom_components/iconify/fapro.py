@@ -17,9 +17,12 @@ def flush():
 
 async def load_data_file(hass: HomeAssistant):
     filepath = hass.config.path(ICON_PATH + "/fontawesome.json")
-    async with aiofiles.open(filepath, "r") as fp:
-        js = json.loads(await fp.read())
-    return js
+    try:
+        async with aiofiles.open(filepath, "r") as fp:
+            js = json.loads(await fp.read())
+        return js
+    except FileNotFoundError:
+        return None
 
 
 async def load_data(hass: HomeAssistant):
@@ -28,6 +31,9 @@ async def load_data(hass: HomeAssistant):
         return fapro_data_cache
 
     js = await load_data_file(hass)
+
+    if not js:
+        return None
 
     icon_data = defaultdict(list)
     for k, v in js.items():
@@ -47,6 +53,8 @@ async def load_data(hass: HomeAssistant):
 async def get_data(hass: HomeAssistant):
 
     data = await load_data(hass)
+    if not data:
+        return {}
 
     config = hass.config_entries.async_entries(DOMAIN)
     config = config[0] if config else {}
@@ -66,6 +74,8 @@ async def get_data(hass: HomeAssistant):
 async def get_iconlist(hass: HomeAssistant, set: str):
 
     data = await load_data(hass)
+    if not data:
+        return None
 
     style = "duotone" if set == "fapro-duotone" else "light"
 
@@ -77,6 +87,8 @@ async def get_icon(hass: HomeAssistant, set: str, name: str):
     style = set.removeprefix("fapro-")
 
     js = await load_data_file(hass)
+    if not js:
+        return None
 
     data = js.get(name, {}).get("svg", {}).get(style)
     if not data:

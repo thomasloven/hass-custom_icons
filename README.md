@@ -6,4 +6,4 @@ Somewhere in this file, there's a folder named `metadata` which contains a file 
 
 Copy and rename this file to `<your config directory>/custom_icons/fontawesome.json`.
 
-Reload the iconify configuration panel.
+Open the iconify configuration panel and click the Reload Custom Icons button.

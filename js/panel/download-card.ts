@@ -5,6 +5,20 @@ import { customElement, property } from "lit/decorators.js";
 export class IconifyDownloadCard extends LitElement {
   @property() hass;
 
+  async _download_iconify() {
+    await this.hass.connection.sendMessage({
+      type: "iconify/iconify_download",
+    });
+    this.dispatchEvent(new Event("reload"));
+  }
+
+  async _flush_icons() {
+    await this.hass.connection.sendMessage({
+      type: "iconify/flush_icons",
+    });
+    this.dispatchEvent(new Event("reload"));
+  }
+
   render() {
     return html`
       <ha-card outlined>
@@ -43,7 +57,9 @@ export class IconifyDownloadCard extends LitElement {
               Download the latest icon sets from
               <a href="https://github.com/iconify/icon-sets">github</a>
             </span>
-            <ha-button>Download</ha-button>
+            <ha-button @click=${() => this._download_iconify()}
+              >Download</ha-button
+            >
           </ha-settings-row>
 
           <ha-settings-row>
@@ -53,7 +69,7 @@ export class IconifyDownloadCard extends LitElement {
               <tt>custom_icons</tt>
               directory
             </span>
-            <ha-button>Reload</ha-button>
+            <ha-button @click=${() => this._flush_icons()}>Reload</ha-button>
           </ha-settings-row>
         </div>
       </ha-card>

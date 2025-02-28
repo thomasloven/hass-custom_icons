@@ -1,6 +1,5 @@
 import { iconToSVG } from "@iconify/utils";
 import { hass } from "../helpers";
-import { IconifySelectSetCard } from "../panel/select-set-card";
 
 const icon_cache = {};
 

@@ -18,6 +18,23 @@ PANEL_URL = f"/{DOMAIN}/panel.js"
 PANEL_JS = f"custom_components/{DOMAIN}/panel.js"
 
 
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/sets"})
+@websocket_api.require_admin
+@websocket_api.async_response
+@callback
+async def ws_get_icon_sets(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict,
+):
+    """Get list of all available icon sets"""
+    data = {
+        **(await fapro.get_data(hass)),
+        **(await iconify.get_data(hass)),
+    }
+    connection.send_result(msg["id"], data)
+
+
 @websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/activesets"})
 @websocket_api.require_admin
 @callback
@@ -26,6 +43,7 @@ def ws_get_active_sets(
     connection: websocket_api.ActiveConnection,
     msg: dict,
 ):
+    """Get the list of activated icon sets"""
     config = hass.config_entries.async_entries(DOMAIN)
     if not config:
         connection.send_result(msg["id"])
@@ -34,6 +52,37 @@ def ws_get_active_sets(
     config = config[0]
     data = [k for k, v in config.data.items() if v]
     connection.send_result(msg["id"], data)
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): f"{DOMAIN}/select",
+        vol.Required("set"): str,
+        vol.Required("active"): bool,
+    }
+)
+@websocket_api.require_admin
+@callback
+def set_icon_sets(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict,
+):
+    """Enable or disable an icon set"""
+    config = hass.config_entries.async_entries(DOMAIN)
+    if not config:
+        connection.send_result(msg["id"])
+        return
+
+    config = config[0]
+    data = config.data.copy()
+
+    data[msg["set"]] = msg["active"]
+
+    hass.config_entries.async_update_entry(config, data=data)
+
+    iconify.flush()
+    connection.send_result(msg["id"])
 
 
 @websocket_api.websocket_command(
@@ -46,6 +95,7 @@ async def ws_get_icon_list(
     connection: websocket_api.ActiveConnection,
     msg: dict,
 ):
+    """Get the list of icons in a set"""
     if msg["set"].startswith("fapro-"):
         lst = await fapro.get_iconlist(hass, msg["set"])
     else:
@@ -67,6 +117,7 @@ async def ws_get_icon(
     connection: websocket_api.ActiveConnection,
     msg: dict,
 ):
+    """Get an icon"""
     if msg["set"].startswith("fapro-"):
         icn = await fapro.get_icon(hass, msg["set"], msg["icon"])
     else:
@@ -74,74 +125,46 @@ async def ws_get_icon(
     connection.send_result(msg["id"], icn)
 
 
-@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/download"})
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/iconify_download"})
 @websocket_api.require_admin
 @websocket_api.async_response
 @callback
-async def ws_download_icon_sets(
+async def ws_download_iconify_sets(
     hass: HomeAssistant,
     connection: websocket_api.ActiveConnection,
     msg: dict,
 ):
+    """Download iconify icons"""
     await iconify.download_data(hass, True)
     connection.send_result(msg["id"])
 
 
-@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/sets"})
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/flush_icons"})
 @websocket_api.require_admin
 @websocket_api.async_response
 @callback
-async def ws_get_icon_sets(
+async def ws_flush_icons(
     hass: HomeAssistant,
     connection: websocket_api.ActiveConnection,
     msg: dict,
 ):
-    data = {
-        **(await fapro.get_data(hass)),
-        **(await iconify.get_data(hass)),
-    }
-    connection.send_result(msg["id"], data)
-
-
-@websocket_api.websocket_command(
-    {
-        vol.Required("type"): f"{DOMAIN}/select",
-        vol.Required("set"): str,
-        vol.Required("active"): bool,
-    }
-)
-@websocket_api.require_admin
-@callback
-def set_icon_sets(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict,
-):
-    config = hass.config_entries.async_entries(DOMAIN)
-    if not config:
-        connection.send_result(msg["id"])
-        return
-
-    config = config[0]
-    data = config.data.copy()
-
-    data[msg["set"]] = msg["active"]
-
-    hass.config_entries.async_update_entry(config, data=data)
-
+    """Reload all icons"""
     iconify.flush()
+    fapro.flush()
     connection.send_result(msg["id"])
 
 
 async def async_register_iconify_frontend(hass: HomeAssistant):
 
+    websocket_api.async_register_command(hass, ws_get_icon_sets)
     websocket_api.async_register_command(hass, ws_get_active_sets)
+    websocket_api.async_register_command(hass, set_icon_sets)
+
     websocket_api.async_register_command(hass, ws_get_icon_list)
     websocket_api.async_register_command(hass, ws_get_icon)
 
-    websocket_api.async_register_command(hass, ws_download_icon_sets)
-    websocket_api.async_register_command(hass, ws_get_icon_sets)
-    websocket_api.async_register_command(hass, set_icon_sets)
+    websocket_api.async_register_command(hass, ws_download_iconify_sets)
+    websocket_api.async_register_command(hass, ws_flush_icons)
 
     await hass.http.async_register_static_paths(
         [
