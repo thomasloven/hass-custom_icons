@@ -1,5 +1,6 @@
 import aiofiles
 import json
+import random
 from collections import defaultdict
 
 from homeassistant.core import HomeAssistant
@@ -62,11 +63,15 @@ async def get_data(hass: HomeAssistant):
     retval = {}
     for k, v in data.items():
         prefix = f"fapro-{k}"
+        samples = random.sample(v, 6)
+        samples = [await get_icon(hass, k, i["name"]) for i in samples]
+
         retval[prefix] = {
             "name": f"FontAwesome {k}",
             "prefix": prefix,
             "total": len(v),
             "active": config.data.get(f"fapro-{k}"),
+            "sample_icons": samples,
         }
     return retval
 

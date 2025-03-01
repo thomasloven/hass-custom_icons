@@ -437,7 +437,7 @@ let CustomIconsSelectSetCard = class CustomIconsSelectSetCard extends s {
           <p>Only enabled icon sets will be available.</p>
           <p>Remember to reload your frontend after enabling new icon sets.</p>
           ${Object.keys(this.sets).map((prefix) => {
-            var _a;
+            var _a, _b, _c;
             const set = this.sets[prefix];
             return x `
               <ha-settings-row>
@@ -461,18 +461,25 @@ let CustomIconsSelectSetCard = class CustomIconsSelectSetCard extends s {
                   ${set.sample_icons
                 ? x ` <div class="samples">
                         ${(_a = set.sample_icons) === null || _a === void 0 ? void 0 : _a.map((i) => {
+                    if (i.renderer !== "iconify") {
+                        return o(i.body);
+                    }
                     const renderData = iconToSVG(i);
                     if (renderData === null || renderData === void 0 ? void 0 : renderData.body) {
                         return o(iconToHTML(renderData.body, renderData.attributes));
                     }
                     return "";
                 })}
-                        <a
-                          href="https://icon-sets.iconify.design/${prefix}/"
-                          target="_blank"
-                        >
-                          <ha-icon .icon=${"mdi:open-in-new"}> </ha-icon>
-                        </a>
+                        ${((_c = (_b = set.sample_icons) === null || _b === void 0 ? void 0 : _b[0]) === null || _c === void 0 ? void 0 : _c.renderer) == "iconify"
+                    ? x `
+                              <a
+                                href="https://icon-sets.iconify.design/${prefix}/"
+                                target="_blank"
+                              >
+                                <ha-icon .icon=${"mdi:open-in-new"}> </ha-icon>
+                              </a>
+                            `
+                    : ""}
                       </div>`
                 : ""}
                 </span>
@@ -513,6 +520,8 @@ let CustomIconsSelectSetCard = class CustomIconsSelectSetCard extends s {
         vertical-align: bottom;
       }
       .samples svg {
+        fill: currentColor;
+        height: 1em;
         font-size: 2.5em;
         vertical-align: top;
         margin-right: 4px;

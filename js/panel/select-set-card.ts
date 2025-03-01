@@ -48,6 +48,9 @@ export class CustomIconsSelectSetCard extends LitElement {
                   ${set.sample_icons
                     ? html` <div class="samples">
                         ${set.sample_icons?.map((i) => {
+                          if (i.renderer !== "iconify") {
+                            return unsafeHTML(i.body);
+                          }
                           const renderData = iconToSVG(i);
                           if (renderData?.body) {
                             return unsafeHTML(
@@ -56,12 +59,16 @@ export class CustomIconsSelectSetCard extends LitElement {
                           }
                           return "";
                         })}
-                        <a
-                          href="https://icon-sets.iconify.design/${prefix}/"
-                          target="_blank"
-                        >
-                          <ha-icon .icon=${"mdi:open-in-new"}> </ha-icon>
-                        </a>
+                        ${set.sample_icons?.[0]?.renderer == "iconify"
+                          ? html`
+                              <a
+                                href="https://icon-sets.iconify.design/${prefix}/"
+                                target="_blank"
+                              >
+                                <ha-icon .icon=${"mdi:open-in-new"}> </ha-icon>
+                              </a>
+                            `
+                          : ""}
                       </div>`
                     : ""}
                 </span>
@@ -103,6 +110,8 @@ export class CustomIconsSelectSetCard extends LitElement {
         vertical-align: bottom;
       }
       .samples svg {
+        fill: currentColor;
+        height: 1em;
         font-size: 2.5em;
         vertical-align: top;
         margin-right: 4px;

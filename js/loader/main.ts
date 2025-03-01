@@ -69,7 +69,8 @@ const setup = async () => {
 setup();
 
 // Fullcolor support patch
-customElements.whenDefined("ha-icon").then((HaIcon) => {
+customElements.whenDefined("ha-icon").then(() => {
+  const HaIcon = customElements.get("ha-icon");
   const o_setCustomPath = HaIcon.prototype._setCustomPath;
   HaIcon.prototype._setCustomPath = async function (promise, requestedIcon) {
     await o_setCustomPath?.bind(this)?.(promise, requestedIcon);
