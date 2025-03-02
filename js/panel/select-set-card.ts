@@ -29,11 +29,10 @@ export class CustomIconsSelectSetCard extends LitElement {
             return html`
               <ha-settings-row>
                 <span slot="heading">
-                  ${set.name} (
-                  <span class="prefix ${set.active ? "active" : ""}">
-                    ${prefix}:
-                  </span>
-                  )
+                  ${set.name} (<span
+                    class="prefix ${set.active ? "active" : ""}"
+                    >${prefix}:</span
+                  >)
                 </span>
                 <span slot="description">
                   <div>
@@ -48,6 +47,7 @@ export class CustomIconsSelectSetCard extends LitElement {
                   ${set.sample_icons
                     ? html` <div class="samples">
                         ${set.sample_icons?.map((i) => {
+                          if (!i) return "";
                           if (i.renderer !== "iconify") {
                             return unsafeHTML(i.body);
                           }

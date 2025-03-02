@@ -6,7 +6,8 @@ export class CustomIconsDownloadCard extends LitElement {
   @property() hass;
 
   async _download_iconify() {
-    await this.hass.connection.sendMessage({
+    this.dispatchEvent(new Event("clear"));
+    await this.hass.connection.sendMessagePromise({
       type: "custom_icons/iconify_download",
     });
     this.dispatchEvent(new Event("reload"));
@@ -67,7 +68,9 @@ export class CustomIconsDownloadCard extends LitElement {
               Download the latest icon sets from
               <a href="https://github.com/iconify/icon-sets">github</a>
             </span>
-            <ha-button @click=${() => this._download_iconify()}
+            <ha-button
+              id="download-button"
+              @click=${() => this._download_iconify()}
               >Download</ha-button
             >
           </ha-settings-row>

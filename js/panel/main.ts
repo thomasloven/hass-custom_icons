@@ -23,6 +23,10 @@ class BrowserModPanel extends LitElement {
     });
   }
 
+  _clear() {
+    this.sets = null;
+  }
+
   protected firstUpdated(_changedProperties: PropertyValues): void {
     this._get_sets();
   }
@@ -41,6 +45,7 @@ class BrowserModPanel extends LitElement {
           <custom-icons-download-card
             .hass=${this.hass}
             @reload=${() => this._get_sets()}
+            @clear=${() => this._clear()}
           >
           </custom-icons-download-card>
           ${this.sets

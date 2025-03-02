@@ -7,7 +7,9 @@ from homeassistant.components.http import StaticPathConfig
 from homeassistant.core import HomeAssistant, callback
 
 from .const import DOMAIN
-from . import fapro, iconify
+from . import iconset_fapro, iconset_iconify
+
+from .iconset_base import IconSetCollection
 
 LOGGER = logging.getLogger(__name__)
 
@@ -16,6 +18,12 @@ LOADER_JS = f"custom_components/{DOMAIN}/loader.js"
 
 PANEL_URL = f"/{DOMAIN}/panel.js"
 PANEL_JS = f"custom_components/{DOMAIN}/panel.js"
+
+
+collections: list[IconSetCollection] = [
+    iconset_fapro.FontawesomeSets(),
+    iconset_iconify.IconifySets(),
+]
 
 
 @websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/sets"})
@@ -28,10 +36,9 @@ async def ws_get_icon_sets(
     msg: dict,
 ):
     """Get list of all available icon sets"""
-    data = {
-        **(await fapro.get_data(hass)),
-        **(await iconify.get_data(hass)),
-    }
+    data = {}
+    for collection in collections:
+        data.update(**(await collection.sets(hass)))
     connection.send_result(msg["id"], data)
 
 
@@ -81,7 +88,9 @@ def set_icon_sets(
 
     hass.config_entries.async_update_entry(config, data=data)
 
-    iconify.flush()
+    for collection in collections:
+        collection.flush()
+
     connection.send_result(msg["id"])
 
 
@@ -96,10 +105,13 @@ async def ws_get_icon_list(
     msg: dict,
 ):
     """Get the list of icons in a set"""
-    if msg["set"].startswith("fapro-"):
-        lst = await fapro.get_iconlist(hass, msg["set"])
-    else:
-        lst = await iconify.get_iconlist(hass, msg["set"])
+    prefix = msg["set"]
+
+    lst = []
+    for collection in collections:
+        if prefix in await collection.prefixes(hass):
+            lst = await collection.list(hass, prefix)
+
     connection.send_result(msg["id"], lst)
 
 
@@ -118,10 +130,14 @@ async def ws_get_icon(
     msg: dict,
 ):
     """Get an icon"""
-    if msg["set"].startswith("fapro-"):
-        icn = await fapro.get_icon(hass, msg["set"], msg["icon"])
-    else:
-        icn = await iconify.get_icon(hass, msg["set"], msg["icon"])
+    prefix = msg["set"]
+    icon = msg["icon"]
+
+    icn = {}
+    for collection in collections:
+        if prefix in await collection.prefixes(hass):
+            icn = await collection.icon(hass, prefix, icon)
+
     connection.send_result(msg["id"], icn)
 
 
@@ -135,7 +151,7 @@ async def ws_download_iconify_sets(
     msg: dict,
 ):
     """Download iconify icons"""
-    await iconify.download_data(hass, True)
+    await iconify.download(hass)
     connection.send_result(msg["id"])
 
 
@@ -149,8 +165,9 @@ async def ws_flush_icons(
     msg: dict,
 ):
     """Reload all icons"""
-    iconify.flush()
-    fapro.flush()
+    for collection in collections:
+        collection.flush()
+
     connection.send_result(msg["id"])
 
 

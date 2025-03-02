@@ -92,7 +92,8 @@ const loadConfigDashboard = async () => {
 
 let CustomIconsDownloadCard = class CustomIconsDownloadCard extends s {
     async _download_iconify() {
-        await this.hass.connection.sendMessage({
+        this.dispatchEvent(new Event("clear"));
+        await this.hass.connection.sendMessagePromise({
             type: "custom_icons/iconify_download",
         });
         this.dispatchEvent(new Event("reload"));
@@ -151,7 +152,9 @@ let CustomIconsDownloadCard = class CustomIconsDownloadCard extends s {
               Download the latest icon sets from
               <a href="https://github.com/iconify/icon-sets">github</a>
             </span>
-            <ha-button @click=${() => this._download_iconify()}
+            <ha-button
+              id="download-button"
+              @click=${() => this._download_iconify()}
               >Download</ha-button
             >
           </ha-settings-row>
@@ -442,11 +445,10 @@ let CustomIconsSelectSetCard = class CustomIconsSelectSetCard extends s {
             return x `
               <ha-settings-row>
                 <span slot="heading">
-                  ${set.name} (
-                  <span class="prefix ${set.active ? "active" : ""}">
-                    ${prefix}:
-                  </span>
-                  )
+                  ${set.name} (<span
+                    class="prefix ${set.active ? "active" : ""}"
+                    >${prefix}:</span
+                  >)
                 </span>
                 <span slot="description">
                   <div>
@@ -461,6 +463,8 @@ let CustomIconsSelectSetCard = class CustomIconsSelectSetCard extends s {
                   ${set.sample_icons
                 ? x ` <div class="samples">
                         ${(_a = set.sample_icons) === null || _a === void 0 ? void 0 : _a.map((i) => {
+                    if (!i)
+                        return "";
                     if (i.renderer !== "iconify") {
                         return o(i.body);
                     }
@@ -552,6 +556,9 @@ let BrowserModPanel = class BrowserModPanel extends s {
             type: "custom_icons/sets",
         });
     }
+    _clear() {
+        this.sets = null;
+    }
     firstUpdated(_changedProperties) {
         this._get_sets();
     }
@@ -569,6 +576,7 @@ let BrowserModPanel = class BrowserModPanel extends s {
           <custom-icons-download-card
             .hass=${this.hass}
             @reload=${() => this._get_sets()}
+            @clear=${() => this._clear()}
           >
           </custom-icons-download-card>
           ${this.sets

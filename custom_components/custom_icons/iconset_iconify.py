@@ -1,0 +1,161 @@
+import aiohttp
+import aiofiles
+import zipfile
+import json
+import os
+import random
+import logging
+
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+
+from .iconset_base import IconSetCollection, IconData, IconSetInfo, IconListItem
+
+from .const import DOMAIN, ICON_PATH
+
+
+LOGGER = logging.getLogger(__name__)
+
+ICONIFY_REPO_URL = "https://github.com/iconify/icon-sets/archive/refs/heads/master.zip"
+ICONIFY_REPO_FILENAME = "iconify-icon-sets-master.zip"
+
+
+async def download_data(hass: HomeAssistant, force: bool = False):
+
+    targetpath = hass.config.path(ICON_PATH)
+    target = targetpath + "/" + ICONIFY_REPO_FILENAME
+
+    if os.path.isfile(target) and not force:
+        return target
+
+    if not force:
+        return None
+
+    session = aiohttp.ClientSession = async_get_clientsession(hass)
+
+    request = await session.get(url=ICONIFY_REPO_URL)
+    if request.status == 200:
+        async with aiofiles.open(target, "wb") as fp:
+            await fp.write(await request.read())
+
+        return target
+
+    return None
+
+
+async def _get_data_files(hass: HomeAssistant) -> zipfile.Path:
+
+    path = await download_data(hass)
+    if not path:
+        return None
+
+    zf = zipfile.ZipFile(path)
+    data = zipfile.Path(zf) / "icon-sets-master" / "json"
+
+    return data
+
+
+async def _get_data_file(hass: HomeAssistant, prefix: str) -> dict:
+    datafiles = await _get_data_files(hass)
+    if not datafiles:
+        return None
+
+    data = datafiles / f"{prefix}.json"
+    return json.load(data.open())
+
+
+class IconifySets(IconSetCollection):
+
+    def __init__(self):
+        self.cache: dict[str, IconSetInfo] = {}
+        self.prefix_cache = None
+
+    def flush(self) -> None:
+        self.cache = {}
+        self.prefix_cache = None
+
+    async def download(self, hass: HomeAssistant):
+        await download_data(hass, True)
+
+    async def sets(self, hass: HomeAssistant) -> dict[str, IconSetInfo]:
+
+        if self.cache:
+            return self.cache
+
+        LOGGER.error("SETS")
+        config = hass.config_entries.async_entries(DOMAIN)
+        config = config[0] if config else {}
+
+        data = await _get_data_files(hass)
+        if not data:
+            return {}
+        for f in data.iterdir():
+            js = json.load(f.open())
+
+            prefix = js["prefix"]
+
+            samples = js.get("info", {}).get("samples", [])
+            if not samples:
+                icons = list(js.get("icons", {}).keys())
+                if len(icons):
+                    samples = random.sample(icons, min(6, len(icons)))
+            samples = [await self.icon(hass, prefix, icon) for icon in samples]
+
+            self.cache[prefix] = {
+                **js["info"],
+                "prefix": prefix,
+                "active": prefix in config.data,
+                "sample_icons": samples,
+            }
+
+        return self.cache
+
+    async def prefixes(self, hass: HomeAssistant) -> list[str]:
+
+        if self.prefix_cache:
+            return self.prefix_cache
+        data = await _get_data_files(hass)
+        if not data:
+            return []
+
+        config = hass.config_entries.async_entries(DOMAIN)
+        config = config[0] if config else {}
+
+        self.prefix_cache = []
+        for prefix in config.data:
+            if data.joinpath(prefix + ".json").is_file():
+                self.prefix_cache.append(prefix)
+
+        return self.prefix_cache
+
+    async def list(self, hass: HomeAssistant, prefix: str) -> list[IconListItem]:
+
+        datafile = await _get_data_file(hass, prefix)
+
+        if not datafile:
+            return []
+
+        return [{"name": k} for k in datafile.get("icons", {}).keys()]
+
+    async def icon(
+        self, hass: HomeAssistant, prefix: str, icon: str
+    ) -> IconData | None:
+
+        datafile = await _get_data_file(hass, prefix)
+
+        if not datafile or not datafile.get("icons", {}).get(icon, None):
+            return None
+
+        icon_data = {
+            "renderer": "iconify",
+            "left": datafile.get("left", 0),
+            "top": datafile.get("top", 0),
+            "width": datafile.get("width", 16),
+            "height": datafile.get("height", 16),
+            "rotate": datafile.get("rotate", 0),
+            "vFlip": datafile.get("vFlip", False),
+            "hFlip": datafile.get("hFlip", False),
+        }
+        icon_data.update(datafile.get("icons", {}).get(icon, {}))
+
+        return icon_data
