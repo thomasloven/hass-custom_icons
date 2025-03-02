@@ -233,38 +233,28 @@ async function hass() {
 }
 
 const icon_cache = {};
-if (!("customIconsets" in window)) {
-    window.customIconsets = {};
-}
-if (!("customIcons" in window)) {
-    window.customIcons = {};
-}
-const _getIcon = async (iconSet, iconName) => {
-    const conn = (await hass()).connection;
-    const icon = await conn.sendMessagePromise({
-        type: "custom_icons/icon",
-        set: iconSet,
-        icon: iconName,
-    });
-    return icon;
-};
 const getIcon = async (iconSet, iconName) => {
     var _a, _b, _c;
     if (!((_a = icon_cache[iconSet]) === null || _a === void 0 ? void 0 : _a[iconName])) {
-        const icon = await _getIcon(iconSet, iconName);
-        let renderData;
+        const conn = (await hass()).connection;
+        const icon = await conn.sendMessagePromise({
+            type: "custom_icons/icon",
+            set: iconSet,
+            icon: iconName,
+        });
+        let renderedIcon;
         if (icon.renderer == "iconify") {
-            renderData = iconToSVG(icon);
+            renderedIcon = iconToSVG(icon);
         }
         else {
-            renderData = icon;
+            renderedIcon = icon;
         }
         icon_cache[iconSet][iconName] = {
             path: (_b = icon.path) !== null && _b !== void 0 ? _b : "",
             secondaryPath: (_c = icon.path2) !== null && _c !== void 0 ? _c : "",
-            viewBox: renderData.viewBox,
+            viewBox: renderedIcon.viewBox,
             format: "custom_icons",
-            innerSVG: renderData.body,
+            innerSVG: renderedIcon.body,
         };
     }
     return icon_cache[iconSet][iconName];
@@ -282,16 +272,20 @@ const setup = async () => {
     const sets = await conn.sendMessagePromise({
         type: "custom_icons/activesets",
     });
+    const wnd = window;
+    if (!("customIcons" in wnd)) {
+        wnd.customIcons = {};
+    }
     for (const prefix of sets) {
         icon_cache[prefix] = {};
-        window.customIcons[prefix] = {
+        wnd.customIcons[prefix] = {
             getIcon: (iconName) => getIcon(prefix, iconName),
             getIconList: () => getIconList(prefix),
         };
     }
 };
 setup();
-// Fullcolor support patch
+// Fullcolor support patch of ha-icon
 customElements.whenDefined("ha-icon").then(() => {
     const HaIcon = customElements.get("ha-icon");
     const o_setCustomPath = HaIcon.prototype._setCustomPath;
@@ -313,6 +307,7 @@ customElements.whenDefined("ha-icon").then(() => {
             root.innerHTML = icon.innerSVG;
         }
     };
+    // This makes things more stable on first load
     const o_loadIcon = HaIcon.prototype._loadIcon;
     HaIcon.prototype._loadIcon = async function () {
         this._loadIcon = o_loadIcon.bind(this); // Override only the first run

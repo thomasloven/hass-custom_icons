@@ -82,7 +82,7 @@ async def get_iconlist(hass: HomeAssistant, set: str):
     if not data:
         return None
 
-    style = "duotone" if set == "fapro-duotone" else "light"
+    style = set.removeprefix("fapro-")
 
     return data.get(style, [])
 

@@ -3,40 +3,28 @@ import { hass } from "../helpers";
 
 const icon_cache = {};
 
-if (!("customIconsets" in window)) {
-  (window as any).customIconsets = {};
-}
-if (!("customIcons" in window)) {
-  (window as any).customIcons = {};
-}
-
-const _getIcon = async (iconSet, iconName) => {
-  const conn = (await hass()).connection;
-  const icon = await conn.sendMessagePromise({
-    type: "custom_icons/icon",
-    set: iconSet,
-    icon: iconName,
-  });
-  return icon;
-};
-
 const getIcon = async (iconSet, iconName) => {
   if (!icon_cache[iconSet]?.[iconName]) {
-    const icon = await _getIcon(iconSet, iconName);
+    const conn = (await hass()).connection;
+    const icon = await conn.sendMessagePromise({
+      type: "custom_icons/icon",
+      set: iconSet,
+      icon: iconName,
+    });
 
-    let renderData;
+    let renderedIcon;
     if (icon.renderer == "iconify") {
-      renderData = iconToSVG(icon);
+      renderedIcon = iconToSVG(icon);
     } else {
-      renderData = icon;
+      renderedIcon = icon;
     }
 
     icon_cache[iconSet][iconName] = {
       path: icon.path ?? "",
       secondaryPath: icon.path2 ?? "",
-      viewBox: renderData.viewBox,
+      viewBox: renderedIcon.viewBox,
       format: "custom_icons",
-      innerSVG: renderData.body,
+      innerSVG: renderedIcon.body,
     };
   }
   return icon_cache[iconSet][iconName];
@@ -57,9 +45,15 @@ const setup = async () => {
     type: "custom_icons/activesets",
   });
 
+  const wnd = window as any;
+
+  if (!("customIcons" in wnd)) {
+    wnd.customIcons = {};
+  }
+
   for (const prefix of sets) {
     icon_cache[prefix] = {};
-    (window as any).customIcons[prefix] = {
+    wnd.customIcons[prefix] = {
       getIcon: (iconName) => getIcon(prefix, iconName),
       getIconList: () => getIconList(prefix),
     };
@@ -68,14 +62,25 @@ const setup = async () => {
 
 setup();
 
-// Fullcolor support patch
+interface Icon {
+  path: string;
+  secondaryPath: string;
+  viewBox: string;
+}
+// Extended interface for custom_icons
+interface CustomIcon extends Icon {
+  format: "custom_icons";
+  innerSVG: string;
+}
+
+// Fullcolor support patch of ha-icon
 customElements.whenDefined("ha-icon").then(() => {
   const HaIcon = customElements.get("ha-icon");
   const o_setCustomPath = HaIcon.prototype._setCustomPath;
   HaIcon.prototype._setCustomPath = async function (promise, requestedIcon) {
     await o_setCustomPath?.bind(this)?.(promise, requestedIcon);
 
-    const icon = await promise;
+    const icon: CustomIcon = await promise;
     if (requestedIcon !== this.icon) return;
 
     if (!icon.innerSVG || icon.format !== "custom_icons") return;
@@ -92,6 +97,7 @@ customElements.whenDefined("ha-icon").then(() => {
     }
   };
 
+  // This makes things more stable on first load
   const o_loadIcon = HaIcon.prototype._loadIcon;
   HaIcon.prototype._loadIcon = async function () {
     this._loadIcon = o_loadIcon.bind(this); // Override only the first run
