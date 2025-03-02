@@ -1,7 +1,8 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
-import { iconToSVG, iconToHTML } from "@iconify/utils";
+import { iconToHTML } from "@iconify/utils";
+import { renderIcon, renderIconHTML } from "../helpers";
 
 @customElement("custom-icons-select-set-card")
 export class CustomIconsSelectSetCard extends LitElement {
@@ -23,7 +24,8 @@ export class CustomIconsSelectSetCard extends LitElement {
         <h1 class="card-header">Icon sets</h1>
         <div class="card-content">
           <p>Only enabled icon sets will be available.</p>
-          <p>Remember to reload your frontend after enabling new icon sets.</p>
+          <p>Remember to refresh your browser after enabling new icon sets.</p>
+
           ${Object.keys(this.sets).map((prefix) => {
             const set = this.sets[prefix];
             return html`
@@ -47,17 +49,7 @@ export class CustomIconsSelectSetCard extends LitElement {
                   ${set.sample_icons
                     ? html` <div class="samples">
                         ${set.sample_icons?.map((i) => {
-                          if (!i) return "";
-                          if (i.renderer !== "iconify") {
-                            return unsafeHTML(i.body);
-                          }
-                          const renderData = iconToSVG(i);
-                          if (renderData?.body) {
-                            return unsafeHTML(
-                              iconToHTML(renderData.body, renderData.attributes)
-                            );
-                          }
-                          return "";
+                          return unsafeHTML(renderIconHTML(i));
                         })}
                         ${set.sample_icons?.[0]?.renderer == "iconify"
                           ? html`
@@ -111,7 +103,6 @@ export class CustomIconsSelectSetCard extends LitElement {
       }
       .samples svg {
         fill: currentColor;
-        height: 1em;
         font-size: 2.5em;
         vertical-align: top;
         margin-right: 4px;

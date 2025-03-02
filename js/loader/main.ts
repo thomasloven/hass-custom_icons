@@ -1,5 +1,4 @@
-import { iconToSVG } from "@iconify/utils";
-import { hass } from "../helpers";
+import { hass, renderIcon } from "../helpers";
 
 const icon_cache = {};
 
@@ -12,20 +11,7 @@ const getIcon = async (iconSet, iconName) => {
       icon: iconName,
     });
 
-    let renderedIcon;
-    if (icon.renderer == "iconify") {
-      renderedIcon = iconToSVG(icon);
-    } else {
-      renderedIcon = icon;
-    }
-
-    icon_cache[iconSet][iconName] = {
-      path: icon.path ?? "",
-      secondaryPath: icon.path2 ?? "",
-      viewBox: renderedIcon.viewBox,
-      format: "custom_icons",
-      innerSVG: renderedIcon.body,
-    };
+    icon_cache[iconSet][iconName] = renderIcon(icon);
   }
   return icon_cache[iconSet][iconName];
 };

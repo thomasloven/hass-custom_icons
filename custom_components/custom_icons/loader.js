@@ -231,10 +231,35 @@ async function hass() {
         await new Promise((r) => window.setTimeout(r, 100));
     return base.hass;
 }
+const renderIcon = (icon) => {
+    var _a, _b;
+    if (!icon)
+        return null;
+    let renderedIcon;
+    if (icon.renderer == "iconify") {
+        renderedIcon = iconToSVG(icon);
+    }
+    else {
+        renderedIcon = icon;
+        renderedIcon.attributes = {
+            height: "1em",
+            width: "1em",
+            viewBox: icon.viewBox.join(" "),
+        };
+    }
+    return {
+        path: (_a = icon.path) !== null && _a !== void 0 ? _a : "",
+        secondaryPath: (_b = icon.path2) !== null && _b !== void 0 ? _b : "",
+        viewBox: renderedIcon.viewBox,
+        format: "custom_icons",
+        innerSVG: renderedIcon.body,
+        attributes: renderedIcon.attributes,
+    };
+};
 
 const icon_cache = {};
 const getIcon = async (iconSet, iconName) => {
-    var _a, _b, _c;
+    var _a;
     if (!((_a = icon_cache[iconSet]) === null || _a === void 0 ? void 0 : _a[iconName])) {
         const conn = (await hass()).connection;
         const icon = await conn.sendMessagePromise({
@@ -242,20 +267,7 @@ const getIcon = async (iconSet, iconName) => {
             set: iconSet,
             icon: iconName,
         });
-        let renderedIcon;
-        if (icon.renderer == "iconify") {
-            renderedIcon = iconToSVG(icon);
-        }
-        else {
-            renderedIcon = icon;
-        }
-        icon_cache[iconSet][iconName] = {
-            path: (_b = icon.path) !== null && _b !== void 0 ? _b : "",
-            secondaryPath: (_c = icon.path2) !== null && _c !== void 0 ? _c : "",
-            viewBox: renderedIcon.viewBox,
-            format: "custom_icons",
-            innerSVG: renderedIcon.body,
-        };
+        icon_cache[iconSet][iconName] = renderIcon(icon);
     }
     return icon_cache[iconSet][iconName];
 };

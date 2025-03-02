@@ -71,135 +71,6 @@ const i$1=(i,e)=>"method"===e.kind&&e.descriptor&&!("value"in e.descriptor)?{...
  * SPDX-License-Identifier: BSD-3-Clause
  */var n;null!=(null===(n=window.HTMLSlotElement)||void 0===n?void 0:n.prototype.assignedElements)?(o,n)=>o.assignedElements(n):(o,n)=>o.assignedNodes(n).filter((o=>o.nodeType===Node.ELEMENT_NODE));
 
-const loadConfigDashboard = async () => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
-    await customElements.whenDefined("partial-panel-resolver");
-    const ppResolver = document.createElement("partial-panel-resolver");
-    const routes = ppResolver.getRoutes([
-        {
-            component_name: "config",
-            url_path: "a",
-        },
-    ]);
-    await ((_c = (_b = (_a = routes === null || routes === void 0 ? void 0 : routes.routes) === null || _a === void 0 ? void 0 : _a.a) === null || _b === void 0 ? void 0 : _b.load) === null || _c === void 0 ? void 0 : _c.call(_b));
-    await customElements.whenDefined("ha-panel-config");
-    const configRouter = document.createElement("ha-panel-config");
-    await ((_g = (_f = (_e = (_d = configRouter === null || configRouter === void 0 ? void 0 : configRouter.routerOptions) === null || _d === void 0 ? void 0 : _d.routes) === null || _e === void 0 ? void 0 : _e.dashboard) === null || _f === void 0 ? void 0 : _f.load) === null || _g === void 0 ? void 0 : _g.call(_f)); // Load ha-config-dashboard
-    await ((_l = (_k = (_j = (_h = configRouter === null || configRouter === void 0 ? void 0 : configRouter.routerOptions) === null || _h === void 0 ? void 0 : _h.routes) === null || _j === void 0 ? void 0 : _j.general) === null || _k === void 0 ? void 0 : _k.load) === null || _l === void 0 ? void 0 : _l.call(_k)); // Load ha-settings-row
-    await ((_q = (_p = (_o = (_m = configRouter === null || configRouter === void 0 ? void 0 : configRouter.routerOptions) === null || _m === void 0 ? void 0 : _m.routes) === null || _o === void 0 ? void 0 : _o.entities) === null || _p === void 0 ? void 0 : _p.load) === null || _q === void 0 ? void 0 : _q.call(_p)); // Load ha-data-table
-    await customElements.whenDefined("ha-config-dashboard");
-};
-
-let CustomIconsDownloadCard = class CustomIconsDownloadCard extends s {
-    async _download_iconify() {
-        this.dispatchEvent(new Event("clear"));
-        await this.hass.connection.sendMessagePromise({
-            type: "custom_icons/iconify_download",
-        });
-        this.dispatchEvent(new Event("reload"));
-    }
-    async _flush_icons() {
-        await this.hass.connection.sendMessage({
-            type: "custom_icons/flush_icons",
-        });
-        this.dispatchEvent(new Event("reload"));
-    }
-    render() {
-        return x `
-      <ha-card outlined>
-        <h1 class="card-header">Custom icons</h1>
-        <div class="card-content">
-          <ha-alert alert-type="warning" title="Dangers of external SVG icons">
-            SVG icons cat theoretically contain javascript and listeners or link
-            to external resources. <br />
-
-            Home Assistant normally protects against this, but in order to
-            enable advanced features such as duotone or color support
-            <b>that protection is disabled for all Custom Icons</b>. <br />
-
-            Iconify icons are allegedly validated and cleaned from any such
-            potentially harmful elements, but be careful. <br />
-            <br />
-
-            I as the author of this Home Assistant component take no
-            responsibility for the content of the icon sets.
-          </ha-alert>
-
-          <br />
-          <ha-settings-row>
-            <span slot="heading">Reload Custom Icons</span>
-            <span slot="description">
-              Reload icons in the
-              <tt>custom_icons</tt>
-              directory<br />
-              (this includes Fontawesome-pro icons if available)
-            </span>
-            <ha-button @click=${() => this._flush_icons()}>Reload</ha-button>
-          </ha-settings-row>
-          <br />
-
-          <ha-alert alert-type="info" title="About Iconify icons">
-            <a href="https://iconify.design/">Iconify</a> is a collection of
-            several popular icon sets. Updates are published frequently, and the
-            database is therefore downloaded from github on request. If an icon
-            seems to be missing, try the Download button below to update the
-            local database.
-          </ha-alert>
-
-          <ha-settings-row>
-            <span slot="heading">Update Iconify Icons</span>
-            <span slot="description">
-              Download the latest icon sets from
-              <a href="https://github.com/iconify/icon-sets">github</a>
-            </span>
-            <ha-button
-              id="download-button"
-              @click=${() => this._download_iconify()}
-              >Download</ha-button
-            >
-          </ha-settings-row>
-        </div>
-      </ha-card>
-    `;
-    }
-    static get styles() {
-        return i$3 `
-      .card-header {
-        display: flex;
-        justify-content: space-between;
-      }
-      ha-textfield {
-        width: 250px;
-        display: block;
-        margin-top: 8px;
-      }
-      a {
-        color: var(--primary-color);
-        text-decoration: none;
-      }
-    `;
-    }
-};
-__decorate([
-    n$1()
-], CustomIconsDownloadCard.prototype, "hass", void 0);
-CustomIconsDownloadCard = __decorate([
-    e$3("custom-icons-download-card")
-], CustomIconsDownloadCard);
-
-/**
- * @license
- * Copyright 2017 Google LLC
- * SPDX-License-Identifier: BSD-3-Clause
- */
-const t={ATTRIBUTE:1,CHILD:2,PROPERTY:3,BOOLEAN_ATTRIBUTE:4,EVENT:5,ELEMENT:6},e$1=t=>(...e)=>({_$litDirective$:t,values:e});class i{constructor(t){}get _$AU(){return this._$AM._$AU}_$AT(t,e,i){this._$Ct=t,this._$AM=e,this._$Ci=i;}_$AS(t,e){return this.update(t,e)}update(t,e){return this.render(...e)}}
-
-/**
- * @license
- * Copyright 2017 Google LLC
- * SPDX-License-Identifier: BSD-3-Clause
- */class e extends i{constructor(i){if(super(i),this.et=A,i.type!==t.CHILD)throw Error(this.constructor.directiveName+"() can only be used in child bindings")}render(r){if(r===A||null==r)return this.ft=void 0,this.et=r;if(r===T)return r;if("string"!=typeof r)throw Error(this.constructor.directiveName+"() called with a non-string value");if(r===this.et)return this.ft;this.et=r;const s=[r];return s.raw=s,this.ft={_$litType$:this.constructor.resultType,strings:s,values:[]}}}e.directiveName="unsafeHTML",e.resultType=1;const o=e$1(e);
-
 const defaultIconDimensions = Object.freeze(
   {
     left: 0,
@@ -423,6 +294,166 @@ function iconToHTML(body, attributes) {
   return '<svg xmlns="http://www.w3.org/2000/svg"' + renderAttribsHTML + ">" + body + "</svg>";
 }
 
+const loadConfigDashboard = async () => {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
+    await customElements.whenDefined("partial-panel-resolver");
+    const ppResolver = document.createElement("partial-panel-resolver");
+    const routes = ppResolver._getRoutes([
+        {
+            component_name: "config",
+            url_path: "a",
+        },
+    ]);
+    await ((_c = (_b = (_a = routes === null || routes === void 0 ? void 0 : routes.routes) === null || _a === void 0 ? void 0 : _a.a) === null || _b === void 0 ? void 0 : _b.load) === null || _c === void 0 ? void 0 : _c.call(_b));
+    await customElements.whenDefined("ha-panel-config");
+    const configRouter = document.createElement("ha-panel-config");
+    await ((_g = (_f = (_e = (_d = configRouter === null || configRouter === void 0 ? void 0 : configRouter.routerOptions) === null || _d === void 0 ? void 0 : _d.routes) === null || _e === void 0 ? void 0 : _e.dashboard) === null || _f === void 0 ? void 0 : _f.load) === null || _g === void 0 ? void 0 : _g.call(_f)); // Load ha-config-dashboard
+    await ((_l = (_k = (_j = (_h = configRouter === null || configRouter === void 0 ? void 0 : configRouter.routerOptions) === null || _h === void 0 ? void 0 : _h.routes) === null || _j === void 0 ? void 0 : _j.general) === null || _k === void 0 ? void 0 : _k.load) === null || _l === void 0 ? void 0 : _l.call(_k)); // Load ha-settings-row
+    await ((_q = (_p = (_o = (_m = configRouter === null || configRouter === void 0 ? void 0 : configRouter.routerOptions) === null || _m === void 0 ? void 0 : _m.routes) === null || _o === void 0 ? void 0 : _o.entities) === null || _p === void 0 ? void 0 : _p.load) === null || _q === void 0 ? void 0 : _q.call(_p)); // Load ha-data-table
+    await customElements.whenDefined("ha-config-dashboard");
+};
+const renderIcon = (icon) => {
+    var _a, _b;
+    if (!icon)
+        return null;
+    let renderedIcon;
+    if (icon.renderer == "iconify") {
+        renderedIcon = iconToSVG(icon);
+    }
+    else {
+        renderedIcon = icon;
+        renderedIcon.attributes = {
+            height: "1em",
+            width: "1em",
+            viewBox: icon.viewBox.join(" "),
+        };
+    }
+    return {
+        path: (_a = icon.path) !== null && _a !== void 0 ? _a : "",
+        secondaryPath: (_b = icon.path2) !== null && _b !== void 0 ? _b : "",
+        viewBox: renderedIcon.viewBox,
+        format: "custom_icons",
+        innerSVG: renderedIcon.body,
+        attributes: renderedIcon.attributes,
+    };
+};
+const renderIconHTML = (icon) => {
+    const icn = renderIcon(icon);
+    if (!icn)
+        return "";
+    return iconToHTML(icn.innerSVG, icn.attributes);
+};
+
+let CustomIconsDownloadCard = class CustomIconsDownloadCard extends s {
+    async _download_iconify() {
+        this.dispatchEvent(new Event("clear"));
+        await this.hass.connection.sendMessagePromise({
+            type: "custom_icons/iconify_download",
+        });
+        this.dispatchEvent(new Event("reload"));
+    }
+    async _flush_icons() {
+        await this.hass.connection.sendMessage({
+            type: "custom_icons/flush_icons",
+        });
+        this.dispatchEvent(new Event("reload"));
+    }
+    render() {
+        return x `
+      <ha-card outlined>
+        <h1 class="card-header">Custom icons</h1>
+        <div class="card-content">
+          <ha-alert alert-type="warning" title="Dangers of external SVG icons">
+            SVG icons cat theoretically contain javascript and listeners or link
+            to external resources. <br />
+
+            Home Assistant normally protects against this, but in order to
+            enable advanced features such as duotone or color support
+            <b>that protection is disabled for all Custom Icons</b>. <br />
+
+            Iconify icons are allegedly validated and cleaned from any such
+            potentially harmful elements, but be careful. <br />
+            <br />
+
+            I as the author of this Home Assistant component take no
+            responsibility for the content of the icon sets.
+          </ha-alert>
+
+          <br />
+          <ha-settings-row>
+            <span slot="heading">Reload Custom Icons</span>
+            <span slot="description">
+              Reload icons in the
+              <tt>custom_icons</tt>
+              directory<br />
+              (this includes Fontawesome-pro icons if available)
+            </span>
+            <ha-button @click=${() => this._flush_icons()}>Reload</ha-button>
+          </ha-settings-row>
+          <br />
+
+          <ha-alert alert-type="info" title="About Iconify icons">
+            <a href="https://iconify.design/">Iconify</a> is a collection of
+            several popular icon sets. Updates are published frequently, and the
+            database is therefore downloaded from github on request. If an icon
+            seems to be missing, try the Download button below to update the
+            local database.
+          </ha-alert>
+
+          <ha-settings-row>
+            <span slot="heading">Update Iconify Icons</span>
+            <span slot="description">
+              Download the latest icon sets from
+              <a href="https://github.com/iconify/icon-sets">github</a>
+            </span>
+            <ha-button
+              id="download-button"
+              @click=${() => this._download_iconify()}
+              >Download</ha-button
+            >
+          </ha-settings-row>
+        </div>
+      </ha-card>
+    `;
+    }
+    static get styles() {
+        return i$3 `
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+      }
+      ha-textfield {
+        width: 250px;
+        display: block;
+        margin-top: 8px;
+      }
+      a {
+        color: var(--primary-color);
+        text-decoration: none;
+      }
+    `;
+    }
+};
+__decorate([
+    n$1()
+], CustomIconsDownloadCard.prototype, "hass", void 0);
+CustomIconsDownloadCard = __decorate([
+    e$3("custom-icons-download-card")
+], CustomIconsDownloadCard);
+
+/**
+ * @license
+ * Copyright 2017 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+const t={ATTRIBUTE:1,CHILD:2,PROPERTY:3,BOOLEAN_ATTRIBUTE:4,EVENT:5,ELEMENT:6},e$1=t=>(...e)=>({_$litDirective$:t,values:e});class i{constructor(t){}get _$AU(){return this._$AM._$AU}_$AT(t,e,i){this._$Ct=t,this._$AM=e,this._$Ci=i;}_$AS(t,e){return this.update(t,e)}update(t,e){return this.render(...e)}}
+
+/**
+ * @license
+ * Copyright 2017 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */class e extends i{constructor(i){if(super(i),this.et=A,i.type!==t.CHILD)throw Error(this.constructor.directiveName+"() can only be used in child bindings")}render(r){if(r===A||null==r)return this.ft=void 0,this.et=r;if(r===T)return r;if("string"!=typeof r)throw Error(this.constructor.directiveName+"() called with a non-string value");if(r===this.et)return this.ft;this.et=r;const s=[r];return s.raw=s,this.ft={_$litType$:this.constructor.resultType,strings:s,values:[]}}}e.directiveName="unsafeHTML",e.resultType=1;const o=e$1(e);
+
 let CustomIconsSelectSetCard = class CustomIconsSelectSetCard extends s {
     async _toggle_set(prefix) {
         const state = this.sets[prefix].active;
@@ -438,7 +469,8 @@ let CustomIconsSelectSetCard = class CustomIconsSelectSetCard extends s {
         <h1 class="card-header">Icon sets</h1>
         <div class="card-content">
           <p>Only enabled icon sets will be available.</p>
-          <p>Remember to reload your frontend after enabling new icon sets.</p>
+          <p>Remember to refresh your browser after enabling new icon sets.</p>
+
           ${Object.keys(this.sets).map((prefix) => {
             var _a, _b, _c;
             const set = this.sets[prefix];
@@ -463,16 +495,7 @@ let CustomIconsSelectSetCard = class CustomIconsSelectSetCard extends s {
                   ${set.sample_icons
                 ? x ` <div class="samples">
                         ${(_a = set.sample_icons) === null || _a === void 0 ? void 0 : _a.map((i) => {
-                    if (!i)
-                        return "";
-                    if (i.renderer !== "iconify") {
-                        return o(i.body);
-                    }
-                    const renderData = iconToSVG(i);
-                    if (renderData === null || renderData === void 0 ? void 0 : renderData.body) {
-                        return o(iconToHTML(renderData.body, renderData.attributes));
-                    }
-                    return "";
+                    return o(renderIconHTML(i));
                 })}
                         ${((_c = (_b = set.sample_icons) === null || _b === void 0 ? void 0 : _b[0]) === null || _c === void 0 ? void 0 : _c.renderer) == "iconify"
                     ? x `
@@ -525,7 +548,6 @@ let CustomIconsSelectSetCard = class CustomIconsSelectSetCard extends s {
       }
       .samples svg {
         fill: currentColor;
-        height: 1em;
         font-size: 2.5em;
         vertical-align: top;
         margin-right: 4px;

@@ -151,7 +151,7 @@ async def ws_download_iconify_sets(
     msg: dict,
 ):
     """Download iconify icons"""
-    await iconify.download(hass)
+    await iconset_iconify.download_data(hass, True)
     connection.send_result(msg["id"])
 
 
