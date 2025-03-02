@@ -1,8 +1,16 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
-import { iconToHTML } from "@iconify/utils";
-import { renderIcon, renderIconHTML } from "../helpers";
+import { renderIconHTML } from "../helpers";
+
+@customElement("custom-icons-icon")
+class CustomIconsIcon extends LitElement {
+  @property() icon;
+
+  render() {
+    return unsafeHTML(renderIconHTML(this.icon));
+  }
+}
 
 @customElement("custom-icons-select-set-card")
 export class CustomIconsSelectSetCard extends LitElement {
@@ -49,7 +57,9 @@ export class CustomIconsSelectSetCard extends LitElement {
                   ${set.sample_icons
                     ? html` <div class="samples">
                         ${set.sample_icons?.map((i) => {
-                          return unsafeHTML(renderIconHTML(i));
+                          return html`<custom-icons-icon
+                            .icon=${i}
+                          ></custom-icons-icon>`;
                         })}
                         ${set.sample_icons?.[0]?.renderer == "iconify"
                           ? html`
@@ -101,14 +111,14 @@ export class CustomIconsSelectSetCard extends LitElement {
       .samples * {
         vertical-align: bottom;
       }
-      .samples svg {
+      custom-icons-icon {
         fill: currentColor;
         font-size: 2.5em;
         vertical-align: top;
         margin-right: 4px;
         transition: font-size 0.2s;
       }
-      .samples svg:hover {
+      custom-icons-icon:hover {
         color: var(--accent-color);
       }
     `;

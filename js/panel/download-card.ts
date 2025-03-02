@@ -1,16 +1,20 @@
 import { LitElement, html, css } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, query } from "lit/decorators.js";
 
 @customElement("custom-icons-download-card")
 export class CustomIconsDownloadCard extends LitElement {
   @property() hass;
 
+  @query("#download-button") download_button;
+
   async _download_iconify() {
     this.dispatchEvent(new Event("clear"));
+    this.download_button.disabled = true;
     await this.hass.connection.sendMessagePromise({
       type: "custom_icons/iconify_download",
     });
     this.dispatchEvent(new Event("reload"));
+    this.download_button.disabled = false;
   }
 
   async _flush_icons() {

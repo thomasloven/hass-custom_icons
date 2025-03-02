@@ -9,7 +9,7 @@ class IconData(TypedDict):
 class IconSetInfo(TypedDict):
     name: str
     prefix: str
-    icon_count: int
+    total: int
     active: bool
     sample_icons: list[IconData]
 

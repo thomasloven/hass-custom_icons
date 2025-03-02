@@ -101,7 +101,6 @@ class FontawesomeSets(IconSetCollection):
 
         data = await self.process_icons(hass)
 
-        LOGGER.error(data.keys())
         if not data:
             return []
 

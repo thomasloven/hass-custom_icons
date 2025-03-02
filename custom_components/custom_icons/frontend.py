@@ -7,7 +7,7 @@ from homeassistant.components.http import StaticPathConfig
 from homeassistant.core import HomeAssistant, callback
 
 from .const import DOMAIN
-from . import iconset_fapro, iconset_iconify
+from . import iconset_custom, iconset_fapro, iconset_iconify
 
 from .iconset_base import IconSetCollection
 
@@ -21,6 +21,7 @@ PANEL_JS = f"custom_components/{DOMAIN}/panel.js"
 
 
 collections: list[IconSetCollection] = [
+    iconset_custom.CustomSet(),
     iconset_fapro.FontawesomeSets(),
     iconset_iconify.IconifySets(),
 ]

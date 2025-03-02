@@ -82,7 +82,6 @@ class IconifySets(IconSetCollection):
         if self.cache:
             return self.cache
 
-        LOGGER.error("SETS")
         config = hass.config_entries.async_entries(DOMAIN)
         config = config[0] if config else {}
 
