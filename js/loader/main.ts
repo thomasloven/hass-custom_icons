@@ -1,9 +1,17 @@
 import { hass, renderIcon } from "../helpers";
 
 const icon_cache = {};
+const list_cache = {};
 
-const getIcon = async (iconSet, iconName) => {
+const getIcon = async (iconSet: string, iconName: string) => {
+  if (iconName.includes("#")) {
+    iconName = iconName.split("#")[0];
+  }
   if (!icon_cache[iconSet]?.[iconName]) {
+    const list = await getIconList(iconSet);
+    if (!list.some((i) => i.name == iconName)) {
+      return { path: "", viewBox: [0, 0, 0, 0] };
+    }
     const conn = (await hass()).connection;
     const icon = await conn.sendMessagePromise({
       type: "custom_icons/icon",
@@ -16,13 +24,15 @@ const getIcon = async (iconSet, iconName) => {
   return icon_cache[iconSet][iconName];
 };
 
-const getIconList = async (iconSet) => {
-  const conn = (await hass()).connection;
-  const list = await conn.sendMessagePromise({
-    type: "custom_icons/list",
-    set: iconSet,
-  });
-  return list;
+const getIconList = async (iconSet: string) => {
+  if (!list_cache[iconSet]) {
+    const conn = (await hass()).connection;
+    list_cache[iconSet] = await conn.sendMessagePromise({
+      type: "custom_icons/list",
+      set: iconSet,
+    });
+  }
+  return list_cache[iconSet];
 };
 
 const setup = async () => {
@@ -42,6 +52,15 @@ const setup = async () => {
     wnd.customIcons[prefix] = {
       getIcon: (iconName) => getIcon(prefix, iconName),
       getIconList: () => getIconList(prefix),
+    };
+  }
+
+  // Backwards compatibility with hass-fontawesome
+  if (sets.includes("custom")) {
+    icon_cache["fapro"] = {};
+    wnd.customIcons["fapro"] = {
+      getIcon: (iconName) => getIcon("custom", iconName),
+      getIconList: () => getIconList("custom"),
     };
   }
 };

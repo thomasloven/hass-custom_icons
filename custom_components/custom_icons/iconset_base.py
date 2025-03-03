@@ -65,6 +65,8 @@ def process_svg(svg) -> IconData:
 
     path = path or sumpath
 
+    body = "<defs><style>.fa-secondary{opacity:.4}</style></defs>" + body
+
     viewBox = s.getElementsByTagName("svg")[0].getAttribute("viewBox").split()
 
     icon_data = {
