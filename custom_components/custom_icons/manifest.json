@@ -6,6 +6,7 @@
   "dependencies": ["frontend", "http"],
   "documentation": "https://github.com/thomasloven/hass-custom_icons",
   "iot_class": "calculated",
+  "issue_tracker": "https://github.com/thomasloven/hass-custom_icons/issues",
   "requirements": [],
   "single_config_entry": true,
   "version": "0.1.0"
