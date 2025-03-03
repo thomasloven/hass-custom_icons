@@ -1,4 +1,5 @@
 from typing import TypedDict
+from xml.dom import minidom
 from homeassistant.core import HomeAssistant
 
 
@@ -37,3 +38,41 @@ class IconSetCollection:
         self, hass: HomeAssistant, prefix: str, icon: str
     ) -> IconData | None:
         pass
+
+
+def process_svg(svg) -> IconData:
+
+    body = svg
+
+    if hasattr(body, "decode"):
+        body.decode("utf-8")
+    body = str(body)
+
+    s = minidom.parseString(body)
+    sumpath = ""
+    path = ""
+    path2 = ""
+
+    for p in s.getElementsByTagName("path"):
+        d = p.getAttribute("d")
+        sumpath += d
+        classes = p.getAttribute("class").split()
+        for c in classes:
+            if c in ["primary", "fa-primary"]:
+                path = d
+            if c in ["secondary", "fa-secondary"]:
+                path2 = d
+
+    path = path or sumpath
+
+    viewBox = s.getElementsByTagName("svg")[0].getAttribute("viewBox").split()
+
+    icon_data = {
+        "renderer": None,
+        "viewBox": viewBox,
+        "path": path,
+        "path2": path2,
+        "body": body,
+    }
+
+    return icon_data

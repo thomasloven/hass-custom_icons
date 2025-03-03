@@ -1,21 +1,25 @@
 import asyncio
-import aiofiles
 import os
 import logging
-from xml.dom import minidom
 import random
 from homeassistant.core import HomeAssistant
 
-from .iconset_base import IconSetCollection, IconData, IconSetInfo, IconListItem
+from .iconset_base import (
+    IconSetCollection,
+    IconData,
+    IconSetInfo,
+    IconListItem,
+    process_svg,
+)
 from .const import DOMAIN, ICON_PATH
 
 LOGGER = logging.getLogger(__name__)
 
 
-def list_icons(path):
+def list_icons(root):
     icon_list = []
-    for dirpath, dirnames, filenames in os.walk(path):
-        subdir = dirpath.removeprefix(path).lstrip("/")
+    for dirpath, dirnames, filenames in os.walk(root):
+        subdir = dirpath.removeprefix(root).lstrip("/")
         icon_list.extend(
             [
                 {"name": os.path.join(subdir, fn.removesuffix(".svg"))}
@@ -24,6 +28,11 @@ def list_icons(path):
             ]
         )
     return icon_list
+
+
+def read_icon(path: str) -> str:
+    with open(path) as fp:
+        return fp.read()
 
 
 class CustomSet(IconSetCollection):
@@ -75,39 +84,9 @@ class CustomSet(IconSetCollection):
         self, hass: HomeAssistant, prefix: str, icon: str
     ) -> IconData | None:
 
-        icon_path = hass.config.path(ICON_PATH)
-        icon_data = {}
-        async with aiofiles.open(f"{icon_path}/{icon}.svg") as svg:
-            body = await svg.read()
-            if hasattr(body, "decode"):
-                body.decode("utf-8")
-            body = str(body)
+        icon_path = hass.config.path(ICON_PATH + "/" + icon + ".svg")
 
-            s = minidom.parseString(body)
-            paths = s.getElementsByTagName("path")
-            sumpath = ""
-            path = ""
-            path2 = ""
+        loop = asyncio.get_running_loop()
+        icon = await loop.run_in_executor(None, read_icon, icon_path)
 
-            for p in paths:
-                d = p.getAttribute("d")
-                sumpath += "d"
-                classes = p.getAttribute("class").split()
-                for c in classes:
-                    if c in ["primary", "fa-primary"]:
-                        path = d
-                    if c in ["secondary", "fa-secondary"]:
-                        patth2 = d
-
-            path = path or sumpath
-
-            viewBox = s.getElementsByTagName("svg")[0].getAttribute("viewBox").split()
-
-            icon_data = {
-                "renderer": None,
-                "viewBox": viewBox,
-                "path": path,
-                "path2": path2,
-                "body": body,
-            }
-        return icon_data
+        return process_svg(icon)

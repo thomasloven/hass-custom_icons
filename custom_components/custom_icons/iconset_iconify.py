@@ -1,5 +1,5 @@
+import asyncio
 import aiohttp
-import aiofiles
 import zipfile
 import json
 import os
@@ -20,6 +20,15 @@ ICONIFY_REPO_URL = "https://github.com/iconify/icon-sets/archive/refs/heads/mast
 ICONIFY_REPO_FILENAME = "iconify-icon-sets-master.zip"
 
 
+def _save_file(path: str, data: str | bytes):
+    with open(path, "wb") as fp:
+        fp.write(data)
+
+
+def _load_file(path: str) -> zipfile.ZipFile:
+    return zipfile.ZipFile(path)
+
+
 async def download_data(hass: HomeAssistant, force: bool = False):
 
     targetpath = hass.config.path(ICON_PATH)
@@ -35,8 +44,8 @@ async def download_data(hass: HomeAssistant, force: bool = False):
 
     request = await session.get(url=ICONIFY_REPO_URL)
     if request.status == 200:
-        async with aiofiles.open(target, "wb") as fp:
-            await fp.write(await request.read())
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, _save_file, target, await request.read())
 
         return target
 
@@ -49,7 +58,8 @@ async def _get_data_files(hass: HomeAssistant) -> zipfile.Path:
     if not path:
         return None
 
-    zf = zipfile.ZipFile(path)
+    loop = asyncio.get_running_loop()
+    zf = await loop.run_in_executor(None, _load_file, path)
     data = zipfile.Path(zf) / "icon-sets-master" / "json"
 
     return data
@@ -73,9 +83,6 @@ class IconifySets(IconSetCollection):
     def flush(self) -> None:
         self.cache = {}
         self.prefix_cache = None
-
-    async def download(self, hass: HomeAssistant):
-        await download_data(hass, True)
 
     async def sets(self, hass: HomeAssistant) -> dict[str, IconSetInfo]:
 

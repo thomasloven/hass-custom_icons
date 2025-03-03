@@ -1,4 +1,4 @@
-import aiofiles
+import asyncio
 import json
 import random
 import logging
@@ -17,11 +17,11 @@ FONTAWESOME_FILENAME = "fontawesome.json"
 PREPREFIX = "fapro-"
 
 
-async def _get_data_file(hass: HomeAssistant) -> dict:
+def get_data_file(hass: HomeAssistant) -> dict:
     filepath = hass.config.path(ICON_PATH + "/" + FONTAWESOME_FILENAME)
     try:
-        async with aiofiles.open(filepath, "r") as fp:
-            js = json.loads(await fp.read())
+        with open(filepath) as fp:
+            js = json.loads(fp.read())
         return js
     except FileNotFoundError:
         return None
@@ -44,12 +44,13 @@ class FontawesomeSets(IconSetCollection):
         config = hass.config_entries.async_entries(DOMAIN)
         config = config[0] if config else {}
 
-        data = await _get_data_file(hass)
-        if not data:
+        loop = asyncio.get_running_loop()
+        datafile = await loop.run_in_executor(None, get_data_file, hass)
+        if not datafile:
             return
 
         self.list_cache = defaultdict(list)
-        for k, v in data.items():
+        for k, v in datafile.items():
             for style in v.get("styles", []):
                 self.list_cache[style].append(
                     {
@@ -112,7 +113,8 @@ class FontawesomeSets(IconSetCollection):
 
         style = prefix.removeprefix(PREPREFIX)
 
-        datafile = await _get_data_file(hass)
+        loop = asyncio.get_running_loop()
+        datafile = await loop.run_in_executor(None, get_data_file, hass)
 
         if not datafile:
             return None
