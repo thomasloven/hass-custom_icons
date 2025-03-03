@@ -3,7 +3,8 @@ import { hass, renderIcon } from "../helpers";
 const icon_cache = {};
 const list_cache = {};
 
-const getIcon = async (iconSet: string, iconName: string) => {
+const getIconQueue = [];
+const _getIcon = async (iconSet: string, iconName: string) => {
   if (iconName.includes("#")) {
     iconName = iconName.split("#")[0];
   }
@@ -23,6 +24,29 @@ const getIcon = async (iconSet: string, iconName: string) => {
   }
   return icon_cache[iconSet][iconName];
 };
+
+const queueWorker = async () => {
+  const work = getIconQueue.shift();
+  if (work !== undefined) {
+    let resolve, iconSet, iconName;
+    [iconSet, iconName, resolve] = work;
+    const icon = await _getIcon(iconSet, iconName);
+    resolve(icon);
+    setTimeout(queueWorker, 1);
+  } else {
+    setTimeout(queueWorker, 50);
+  }
+};
+
+const getIcon = (iconSet: string, iconName: string) => {
+  const promise = new Promise((resolve) =>
+    getIconQueue.push([iconSet, iconName, resolve])
+  );
+
+  return promise;
+};
+
+queueWorker();
 
 const getIconList = async (iconSet: string) => {
   if (!list_cache[iconSet]) {
