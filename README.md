@@ -73,3 +73,5 @@ Yes
 ### Do I need all that `#fullcolor` nonsense from `hass-fontawesome`?
 
 No
+
+Test
