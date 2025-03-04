@@ -110,7 +110,7 @@ class IconifySets(IconSetCollection):
             self.cache[prefix] = {
                 **js["info"],
                 "prefix": prefix,
-                "active": prefix in config.data,
+                "active": config.data.get(prefix, False),
                 "sample_icons": samples,
             }
 

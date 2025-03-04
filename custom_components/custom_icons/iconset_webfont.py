@@ -86,7 +86,7 @@ class WebfontSets(IconSetCollection):
                     "name": prefix,
                     "prefix": prefix,
                     "total": len(glyphs),
-                    "active": prefix in config.data,
+                    "active": config.data.get(prefix, False),
                     "sample_icons": samples,
                     "filename": f,
                     "size": size,

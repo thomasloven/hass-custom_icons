@@ -84,7 +84,7 @@ class FontawesomeSets(IconSetCollection):
                 "name": f"Fontawesome {k}",
                 "prefix": prefix,
                 "total": len(v),
-                "active": prefix in config.data,
+                "active": config.data.get(prefix, False),
                 "sample_icons": samples,
             }
 

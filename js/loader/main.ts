@@ -80,13 +80,20 @@ const setup = async () => {
   }
 
   // Backwards compatibility with hass-fontawesome
-  if (sets.includes("custom")) {
-    icon_cache["fapro"] = {};
-    wnd.customIcons["fapro"] = {
-      getIcon: (iconName) => getIcon("custom", iconName),
-      getIconList: () => getIconList("custom"),
-    };
-  }
+
+  const add_alias = (set, alias) => {
+    if (sets.includes(set)) {
+      icon_cache[alias] = {};
+      wnd.customIcons[alias] = {
+        getIcon: (iconName) => getIcon(set, iconName),
+        getIconList: () => getIconList(set),
+      };
+    }
+  };
+  add_alias("custom", "fapro");
+  add_alias("fa-regular", "far");
+  add_alias("fa-solid", "fas");
+  add_alias("fa-brands", "fab");
 };
 
 setup();

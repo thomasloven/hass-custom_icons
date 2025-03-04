@@ -58,7 +58,7 @@ class CustomSet(IconSetCollection):
                 "name": "Custom",
                 "prefix": prefix,
                 "total": len(icons),
-                "active": prefix in config.data,
+                "active": config.data.get(prefix, False),
                 "sample_icons": samples,
             }
         }
