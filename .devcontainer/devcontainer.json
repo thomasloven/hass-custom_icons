@@ -14,13 +14,12 @@
     "source=${localWorkspaceFolder}/custom_components/custom_icons,target=/config/custom_components/custom_icons,type=bind",
     "source=${localWorkspaceFolder}/test/custom_icons,target=/config/custom_icons,type=bind"
   ],
-  "runArgs": ["--env-file", "${localWorkspaceFolder}/test/.env"],
+  // "runArgs": ["--env-file", "${localWorkspaceFolder}/test/.env"],
   "customizations": {
       "vscode": {
         "extensions": [
         "github.vscode-pull-request-github",
         "esbenp.prettier-vscode",
-        "spmeesseman.vscode-taskexplorer",
         "ms-python.python",
         "ms-python.black-formatter"
         ],

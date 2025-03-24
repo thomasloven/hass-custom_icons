@@ -1,3 +1,4 @@
 node_modules/
 **/__pycache__
 test/custom_icons/*
+!test/custom_icons/.nodelete
