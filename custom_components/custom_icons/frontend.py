@@ -1,5 +1,6 @@
 import voluptuous as vol
 import logging
+from collections import defaultdict
 
 from homeassistant.components import panel_custom, websocket_api
 from homeassistant.components.frontend import add_extra_js_url
@@ -26,6 +27,8 @@ collections: list[IconSetCollection] = [
     iconset_webfont.WebfontSets(),
     iconset_iconify.IconifySets(),
 ]
+
+icon_cache = defaultdict(dict)
 
 
 @websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/sets"})
@@ -135,12 +138,33 @@ async def ws_get_icon(
     prefix = msg["set"]
     icon = msg["icon"]
 
-    icn = {}
-    for collection in collections:
-        if prefix in await collection.prefixes(hass):
-            icn = await collection.icon(hass, prefix, icon)
+    icn = icon_cache[prefix].get(icon, None)
+    if icn is None:
+        for collection in collections:
+            if prefix in await collection.prefixes(hass):
+                icn = await collection.icon(hass, prefix, icon)
+                icn.update({"prefix": prefix, "icon": icon})
+                icon_cache[prefix][icon] = icn
 
     connection.send_result(msg["id"], icn)
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): f"{DOMAIN}/icon_cache",
+        vol.Required("set"): str,
+    }
+)
+@websocket_api.async_response
+@callback
+async def ws_get_cached_icons(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict,
+):
+    """Get all cached icons"""
+    prefix = msg["set"]
+    connection.send_result(msg["id"], list(icon_cache[prefix].values()))
 
 
 @websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/iconify_download"})
@@ -169,6 +193,7 @@ async def ws_flush_icons(
     """Reload all icons"""
     for collection in collections:
         collection.flush()
+    icon_cache.clear()
 
     connection.send_result(msg["id"])
 
@@ -181,6 +206,7 @@ async def async_register_custom_icons_frontend(hass: HomeAssistant):
 
     websocket_api.async_register_command(hass, ws_get_icon_list)
     websocket_api.async_register_command(hass, ws_get_icon)
+    websocket_api.async_register_command(hass, ws_get_cached_icons)
 
     websocket_api.async_register_command(hass, ws_download_iconify_sets)
     websocket_api.async_register_command(hass, ws_flush_icons)

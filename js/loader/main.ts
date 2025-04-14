@@ -2,6 +2,7 @@ import { hass, renderIcon } from "../helpers";
 
 const icon_cache = {};
 const list_cache = {};
+(window as any).icon_cache = icon_cache;
 
 const getIconQueue = [];
 const _getIcon = async (iconSet: string, iconName: string) => {
@@ -23,6 +24,18 @@ const _getIcon = async (iconSet: string, iconName: string) => {
     icon_cache[iconSet][iconName] = renderIcon(icon);
   }
   return icon_cache[iconSet][iconName];
+};
+
+const _preload_cache = async (iconSet: string) => {
+  const conn = (await hass()).connection;
+  const icons = await conn.sendMessagePromise({
+    type: "custom_icons/icon_cache",
+    set: iconSet,
+  });
+
+  for (const icon of icons) {
+    icon_cache[iconSet][icon.icon] = renderIcon(icon);
+  }
 };
 
 const queueWorker = async () => {
@@ -77,13 +90,13 @@ const setup = async () => {
       getIcon: (iconName) => getIcon(prefix, iconName),
       getIconList: () => getIconList(prefix),
     };
+    _preload_cache(prefix);
   }
 
   // Backwards compatibility with hass-fontawesome
 
   const add_alias = (set, alias) => {
     if (sets.includes(set)) {
-      icon_cache[alias] = {};
       wnd.customIcons[alias] = {
         getIcon: (iconName) => getIcon(set, iconName),
         getIconList: () => getIconList(set),
