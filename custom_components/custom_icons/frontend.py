@@ -32,7 +32,6 @@ icon_cache = defaultdict(dict)
 
 
 @websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/sets"})
-@websocket_api.require_admin
 @websocket_api.async_response
 @callback
 async def ws_get_icon_sets(
@@ -48,7 +47,6 @@ async def ws_get_icon_sets(
 
 
 @websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/activesets"})
-@websocket_api.require_admin
 @callback
 def ws_get_active_sets(
     hass: HomeAssistant,
