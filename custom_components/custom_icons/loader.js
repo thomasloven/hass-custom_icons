@@ -370,20 +370,34 @@ customElements.whenDefined("ha-icon").then(() => {
         if (root) {
             this._path = undefined;
             this._secondaryPath = undefined;
-            root.innerHTML = icon.innerSVG;
+            const svg_g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            svg_g.setAttribute("class", "customIcon");
+            svg_g.innerHTML = icon.innerSVG;
+            root.appendChild(svg_g);
         }
     };
-    // This makes things more stable on first load
     const o_loadIcon = HaIcon.prototype._loadIcon;
     HaIcon.prototype._loadIcon = async function () {
-        this._loadIcon = o_loadIcon.bind(this); // Override only the first run
-        await this._loadIcon();
+        var _a;
+        await ((_a = o_loadIcon === null || o_loadIcon === void 0 ? void 0 : o_loadIcon.bind(this)) === null || _a === void 0 ? void 0 : _a());
+        if (this.icon && this.icon.format !== "custom_icons") {
+            this.updateComplete.then(async () => {
+                const el = this.shadowRoot.querySelector("ha-svg-icon");
+                await (el === null || el === void 0 ? void 0 : el.updateComplete);
+                const root = el === null || el === void 0 ? void 0 : el.shadowRoot.querySelector(".customIcon");
+                if (root) {
+                    root.remove();
+                }
+            });
+        }
         // If the icon set is not found in window.cuustomIcons _loadIcon
         // sets _legacy. So if that is set, try reloading the icon again
         // after a delay. But only once.
-        if (this._legacy) {
+        // This makes things more stable on first load
+        if (this._legacy && !this._legacyReloaded) {
             window.setTimeout(() => {
                 this._legacy = false;
+                this._legacyReloaded = true;
                 this._loadIcon();
             }, 1000);
         }
