@@ -144,10 +144,13 @@ customElements.whenDefined("ha-icon").then(() => {
       this._path = undefined;
       this._secondaryPath = undefined;
 
-      const svg_g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      svg_g.setAttribute("class", "customIcon");
+      let svg_g = root.querySelector(".customIcon");
+      if (!svg_g) {
+        svg_g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        svg_g.setAttribute("class", "customIcon");
+        root.appendChild(svg_g);
+      }
       svg_g.innerHTML = icon.innerSVG;
-      root.appendChild(svg_g);
     }
   };
 
