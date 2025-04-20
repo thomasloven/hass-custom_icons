@@ -2,7 +2,8 @@
 
 ## Installation
 
-- Install Custom Icons through HACS [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=thomasloven&repository=hass-custom_icons)
+- ~~Install Custom Icons through HACS [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=thomasloven&repository=hass-custom_icons)~~
+- This is not on HACS yet, but you can add it as a Custom Repository. Make sure to select "Type: Integration".
   - Or copy the contents of `custom_components/custom_icons/` to `<config>/custom_components/custom_icons`
 - Restart Home Assistant
 - Click this [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=custom_icons)

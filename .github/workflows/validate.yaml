@@ -1,4 +1,4 @@
-name: Valudate
+name: Validate
 
 on:
   push:
