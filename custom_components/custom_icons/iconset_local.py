@@ -35,7 +35,7 @@ def read_icon(path: str) -> str:
         return fp.read()
 
 
-class CustomSet(IconSetCollection):
+class LocalSet(IconSetCollection):
 
     def __init__(self):
         self.cache = []
@@ -44,7 +44,7 @@ class CustomSet(IconSetCollection):
         self.cache = []
 
     async def sets(self, hass: HomeAssistant) -> dict[str, IconSetInfo]:
-        prefix = "custom"
+        prefix = "local"
         icons = await self.list(hass, prefix)
 
         config = hass.config_entries.async_entries(DOMAIN)
@@ -55,7 +55,7 @@ class CustomSet(IconSetCollection):
 
         return {
             prefix: {
-                "name": "Custom",
+                "name": "Local",
                 "prefix": prefix,
                 "total": len(icons),
                 "active": config.data.get(prefix, False),
@@ -64,7 +64,7 @@ class CustomSet(IconSetCollection):
         }
 
     async def prefixes(self, hass: HomeAssistant) -> list[str]:
-        return ["custom"]
+        return ["local"]
 
     async def list(self, hass: HomeAssistant, prefix: str) -> list[IconListItem]:
         if self.cache:

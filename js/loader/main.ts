@@ -104,7 +104,7 @@ const setup = async () => {
       };
     }
   };
-  add_alias("custom", "fapro");
+  add_alias("local", "fapro");
   add_alias("fa6-regular", "far");
   add_alias("fa6-solid", "fas");
   add_alias("fa6-brands", "fab");

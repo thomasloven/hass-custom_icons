@@ -47,7 +47,7 @@ export class CustomIconsDownloadCard extends LitElement {
 
           <br />
           <ha-settings-row>
-            <span slot="heading">Reload Custom Icons</span>
+            <span slot="heading">Reload Local Icons</span>
             <span slot="description">
               Reload icons in the
               <tt>custom_icons</tt>

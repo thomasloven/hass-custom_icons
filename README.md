@@ -16,6 +16,7 @@
 ![configuration](https://github.com/user-attachments/assets/3e88a032-0fb1-4975-95e6-07a809cd2239)
 
 - Here, in the Configuration Panel, you can pick which icon sets you want to use.
+  If you don't see any icons, make sure to click "Download" to update Iconify icons once.
 
 ![select sets](https://github.com/user-attachments/assets/84c3289c-ec4b-40c8-b54d-be4f2f1dd89d)
 
@@ -72,6 +73,13 @@ Note that SVG webfonts has been deprecated and removed from the SVG standard. Th
 ### Does this replace `hass-fontawesome`?
 
 Yes
+
+### How do I migrate?
+
+- Remove `hass-fontawesome`
+- Install `hass-custom_icons`
+- Open the Custom Icons configuration panel (see [Usage](#usage) above)
+- Click "Download"
 
 ### Do I need all that `#fullcolor` nonsense from `hass-fontawesome`?
 
