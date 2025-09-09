@@ -100,7 +100,7 @@ const setup = async () => {
     if (sets.includes(set)) {
       wnd.customIcons[alias] = {
         getIcon: (iconName) => getIcon(set, iconName),
-        getIconList: () => getIconList(set),
+        getIconList: () => [],
       };
     }
   };
