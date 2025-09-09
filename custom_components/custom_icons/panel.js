@@ -20,7 +20,7 @@ function t(t,e,i,s){var o,n=arguments.length,r=n<3?e:null===s?s=Object.getOwnPro
 
           <br />
           <ha-settings-row>
-            <span slot="heading">Reload Custom Icons</span>
+            <span slot="heading">Reload Local Icons</span>
             <span slot="description">
               Reload icons in the
               <tt>custom_icons</tt>
