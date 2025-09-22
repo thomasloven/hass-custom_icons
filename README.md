@@ -40,6 +40,22 @@ If you add new icons, you need to push the RELOAD button before they can be used
 >
 > Only use icons you trust (and preferably have inspected the code for). The author of Custom Icons takes no responsibility for the contents of any icon set - not even those included in Iconify.
 
+> **Note about colors:**
+>
+> SVG files can contain color information.
+> Some SVGs are meant to be used as icons, and will have no color or the magic `currentcolor` value. Those will follow the color of your entities (e.g. turning yellow when an entity is switched on or adjusting to a light color).
+> Some SVGs are _not_ meant to be used as icons, they can include elements of one or more colors.
+>
+> If you want to use a colorized file as a color changing icon, you may need to modify the file yourself. This will require a little bit of CSS knowledge.
+>
+> - First: Make a backup of your svg file.
+> - Open the .svg file in a text editor.
+> - Look for anything that looks like `fill: #123456;` or `stroke: red;` or something like that.
+>   The easiest way would be to change those to `fill: currentcolor;` or `stroke: currentcolor;` (make sure to keep the semicolon `;`).
+> - Also look for anything like `stroke="blue"`. Any instances of those can be removed.
+> - You probably don't want to change anything that says `fill: none;` or `fill="none"`, though. Experiment.
+> - Make sure to go into the configuration and push the RELOAD button after making your changes.
+
 ### Iconify
 
 [Iconify](https://iconify.design/) is a framework for several popular icon sets.

@@ -22,6 +22,7 @@ class CustomIconsConfigFlow(ConfigFlow, domain=DOMAIN):
         return self.async_create_entry(
             title="Custom Icons",
             data={
+                "local": True,
                 "fa6-regular": True,
                 "fa6-solid": True,
                 "fa6-brands": True,
