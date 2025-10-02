@@ -65,24 +65,26 @@ async def _get_data_files(hass: HomeAssistant) -> zipfile.Path:
     return data
 
 
-async def _get_data_file(hass: HomeAssistant, prefix: str) -> dict:
-    datafiles = await _get_data_files(hass)
-    if not datafiles:
-        return None
-
-    data = datafiles / f"{prefix}.json"
-    return json.load(data.open())
-
-
 class IconifySets(IconSetCollection):
 
     def __init__(self):
         self.cache: dict[str, IconSetInfo] = {}
         self.prefix_cache = None
+        self.data_cache: dict = {}
 
     def flush(self) -> None:
         self.cache = {}
         self.prefix_cache = None
+        self.data_cache = {}
+
+    async def data(self, hass, prefix="/"):
+        if not "/" in self.data_cache:
+            self.data_cache["/"] = await _get_data_files(hass)
+        if not prefix in self.data_cache:
+            data = self.data_cache["/"] / f"{prefix}.json"
+            self.data_cache[prefix] = json.load(data.open())
+
+        return self.data_cache[prefix]
 
     async def sets(self, hass: HomeAssistant) -> dict[str, IconSetInfo]:
 
@@ -92,7 +94,7 @@ class IconifySets(IconSetCollection):
         config = hass.config_entries.async_entries(DOMAIN)
         config = config[0] if config else {}
 
-        data = await _get_data_files(hass)
+        data = await self.data(hass)
         if not data:
             return {}
         for f in data.iterdir():
@@ -120,7 +122,7 @@ class IconifySets(IconSetCollection):
 
         if self.prefix_cache:
             return self.prefix_cache
-        data = await _get_data_files(hass)
+        data = await self.data(hass)
         if not data:
             return []
 
@@ -136,7 +138,7 @@ class IconifySets(IconSetCollection):
 
     async def list(self, hass: HomeAssistant, prefix: str) -> list[IconListItem]:
 
-        datafile = await _get_data_file(hass, prefix)
+        datafile = await self.data(hass, prefix)
 
         if not datafile:
             return []
@@ -147,7 +149,7 @@ class IconifySets(IconSetCollection):
         self, hass: HomeAssistant, prefix: str, icon: str
     ) -> IconData | None:
 
-        datafile = await _get_data_file(hass, prefix)
+        datafile = await self.data(hass, prefix)
 
         if not datafile or not datafile.get("icons", {}).get(icon, None):
             return None
