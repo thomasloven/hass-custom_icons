@@ -61,7 +61,7 @@ export class CustomIconsDownloadCard extends LitElement {
           <ha-alert alert-type="info" title="About Iconify icons">
             <a href="https://iconify.design/">Iconify</a> is a collection of
             several popular icon sets. Updates are published frequently, and the
-            database is therefore downloaded from github on request. If an icon
+            database is therefore downloaded from GitHub on request. If an icon
             seems to be missing, try the Download button below to update the
             local database.
           </ha-alert>
@@ -70,7 +70,7 @@ export class CustomIconsDownloadCard extends LitElement {
             <span slot="heading">Update Iconify Icons</span>
             <span slot="description">
               Download the latest icon sets from
-              <a href="https://github.com/iconify/icon-sets">github</a>
+              <a href="https://github.com/iconify/icon-sets">GitHub</a>.
             </span>
             <ha-button
               id="download-button"
