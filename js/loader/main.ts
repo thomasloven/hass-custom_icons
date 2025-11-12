@@ -110,7 +110,7 @@ const setup = async () => {
   add_alias("fa6-brands", "fab");
 };
 
-setup();
+const customIconRegistered = setup().catch(() => console.error("Couldn't add custom icons to frontend"));
 
 interface Icon {
   path: string;
@@ -156,7 +156,8 @@ customElements.whenDefined("ha-icon").then(() => {
 
   const o_loadIcon = HaIcon.prototype._loadIcon;
   HaIcon.prototype._loadIcon = async function () {
-    await o_loadIcon?.bind(this)?.();
+    await customIconRegistered;
+    await o_loadIcon?.call(this);
 
     if (this.icon && this.icon.format !== "custom_icons") {
       this.updateComplete.then(async () => {
@@ -167,18 +168,6 @@ customElements.whenDefined("ha-icon").then(() => {
           root.remove();
         }
       });
-    }
-
-    // If the icon set is not found in window.cuustomIcons _loadIcon
-    // sets _legacy. So if that is set, try reloading the icon again
-    // after a delay. But only once.
-    // This makes things more stable on first load
-    if (this._legacy && !this._legacyReloaded) {
-      window.setTimeout(() => {
-        this._legacy = false;
-        this._legacyReloaded = true;
-        this._loadIcon();
-      }, 1000);
     }
   };
 });
