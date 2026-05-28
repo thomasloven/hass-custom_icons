@@ -30,7 +30,7 @@ export class CustomIconsDownloadCard extends LitElement {
         <h1 class="card-header">Custom icons</h1>
         <div class="card-content">
           <ha-alert alert-type="warning" title="Dangers of external SVG icons">
-            SVG icons cat theoretically contain javascript and listeners or link
+            SVG icons can theoretically contain javascript and listeners or link
             to external resources. <br />
 
             Home Assistant normally protects against this, but in order to
