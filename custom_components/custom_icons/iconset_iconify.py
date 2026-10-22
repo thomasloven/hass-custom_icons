@@ -1,5 +1,4 @@
 import asyncio
-import aiohttp
 import zipfile
 import json
 import os
@@ -40,7 +39,7 @@ async def download_data(hass: HomeAssistant, force: bool = False):
     if not force:
         return None
 
-    session = aiohttp.ClientSession = async_get_clientsession(hass)
+    session = async_get_clientsession(hass)
 
     request = await session.get(url=ICONIFY_REPO_URL)
     if request.status == 200:
