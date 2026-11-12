@@ -1,4 +1,5 @@
 import voluptuous as vol
+import hashlib
 import logging
 from collections import defaultdict
 
@@ -29,6 +30,11 @@ collections: list[IconSetCollection] = [
 ]
 
 icon_cache = defaultdict(dict)
+
+
+def _file_hash(path: str) -> str:
+    with open(path, "rb") as fp:
+        return hashlib.md5(fp.read()).hexdigest()[:8]
 
 
 @websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/sets"})
@@ -141,8 +147,18 @@ async def ws_get_icon(
         for collection in collections:
             if prefix in await collection.prefixes(hass):
                 icn = await collection.icon(hass, prefix, icon)
-                icn.update({"prefix": prefix, "icon": icon})
-                icon_cache[prefix][icon] = icn
+                if icn is not None:
+                    icn.update({"prefix": prefix, "icon": icon})
+                    icon_cache[prefix][icon] = icn
+
+    # Previously a missing icon crashed here (None.update) and an unknown set
+    # returned None. Answer with a proper error so the frontend can show an
+    # empty icon right away instead of checking the whole icon list first.
+    if icn is None:
+        connection.send_error(
+            msg["id"], "not_found", f"Icon {prefix}:{icon} not found"
+        )
+        return
 
     connection.send_result(msg["id"], icn)
 
@@ -216,7 +232,13 @@ async def async_register_custom_icons_frontend(hass: HomeAssistant):
         ]
     )
 
-    add_extra_js_url(hass, LOADER_URL)
+    # The loader is served with a long cache lifetime, so the URL carries a
+    # content hash. Otherwise browsers, the companion apps and proxies such as
+    # Cloudflare keep using an old loader after an update.
+    loader_hash = await hass.async_add_executor_job(
+        _file_hash, hass.config.path(LOADER_JS)
+    )
+    add_extra_js_url(hass, f"{LOADER_URL}?v={loader_hash}")
 
     await panel_custom.async_register_panel(
         hass=hass,

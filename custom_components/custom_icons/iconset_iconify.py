@@ -28,6 +28,11 @@ def _load_file(path: str) -> zipfile.ZipFile:
     return zipfile.ZipFile(path)
 
 
+def _load_json(path: zipfile.Path) -> dict:
+    with path.open() as fp:
+        return json.load(fp)
+
+
 async def download_data(hass: HomeAssistant, force: bool = False):
 
     targetpath = hass.config.path(ICON_PATH)
@@ -77,13 +82,31 @@ class IconifySets(IconSetCollection):
         self.data_cache = {}
 
     async def data(self, hass, prefix="/"):
-        if not "/" in self.data_cache:
-            self.data_cache["/"] = await _get_data_files(hass)
+        # Icon set files can be several MB (material-symbols is ~9 MB) and were
+        # read and parsed inside the event loop, freezing Home Assistant while
+        # it happened. They are now loaded in the executor. The cache holds the
+        # loading task, so concurrent requests for the same set (the frontend
+        # now fetches icons in parallel) share one load instead of parsing the
+        # same file several times. A failed load is removed so it can be retried.
         if not prefix in self.data_cache:
-            data = self.data_cache["/"] / f"{prefix}.json"
-            self.data_cache[prefix] = json.load(data.open())
+            self.data_cache[prefix] = hass.async_create_task(
+                self._load_data(hass, prefix)
+            )
+        try:
+            return await asyncio.shield(self.data_cache[prefix])
+        except Exception:
+            self.data_cache.pop(prefix, None)
+            raise
 
-        return self.data_cache[prefix]
+    async def _load_data(self, hass, prefix):
+        if prefix == "/":
+            return await _get_data_files(hass)
+        root = await self.data(hass)
+        if not root:
+            return None
+        return await hass.async_add_executor_job(
+            _load_json, root / f"{prefix}.json"
+        )
 
     async def sets(self, hass: HomeAssistant) -> dict[str, IconSetInfo]:
 
@@ -97,7 +120,8 @@ class IconifySets(IconSetCollection):
         if not data:
             return {}
         for f in data.iterdir():
-            js = json.load(f.open())
+            # Parse in the executor, see data()
+            js = await hass.async_add_executor_job(_load_json, f)
 
             prefix = js["prefix"]
 
