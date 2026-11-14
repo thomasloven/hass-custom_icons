@@ -52,6 +52,7 @@ class LocalSet(IconSetCollection):
 
         samples = random.sample(icons, min(6, len(icons)))
         samples = [await self.icon(hass, prefix, icon["name"]) for icon in samples]
+        samples = [sample for sample in samples if sample is not None]
 
         return {
             prefix: {
@@ -87,6 +88,14 @@ class LocalSet(IconSetCollection):
         icon_path = hass.config.path(ICON_PATH + "/" + icon + ".svg")
 
         loop = asyncio.get_running_loop()
-        icon = await loop.run_in_executor(None, read_icon, icon_path)
+        icon_data = await loop.run_in_executor(None, read_icon, icon_path)
 
-        return process_svg(icon)
+        try:
+            return process_svg(icon_data)
+        except Exception as err:
+            # A single malformed SVG (e.g. from a Font Awesome Pro export)
+            # used to crash the whole websocket call that lists icon sets,
+            # leaving the config panel stuck on "Loading..." forever.
+            # Skip just this icon instead.
+            LOGGER.warning("Skipping unparseable local icon %r: %s", icon_path, err)
+            return None

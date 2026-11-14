@@ -141,6 +141,10 @@ async def ws_get_icon(
         for collection in collections:
             if prefix in await collection.prefixes(hass):
                 icn = await collection.icon(hass, prefix, icon)
+                if icn is None:
+                    # Malformed source icon (e.g. bad SVG) - nothing to
+                    # cache or return, but don't crash the websocket call.
+                    break
                 icn.update({"prefix": prefix, "icon": icon})
                 icon_cache[prefix][icon] = icn
 
